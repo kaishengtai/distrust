@@ -17,87 +17,563 @@
 
 namespace distrust {
 
-typedef struct _Status__isset {
-  _Status__isset() : leader_id(false), param_server_ids(false) {}
-  bool leader_id;
-  bool param_server_ids;
-} _Status__isset;
+typedef struct _ModelInfo__isset {
+  _ModelInfo__isset() : window_size(false), vocab_size(false), start_token_index(false), end_token_index(false), wordvec_dim(false), hidden_dim(false) {}
+  bool window_size;
+  bool vocab_size;
+  bool start_token_index;
+  bool end_token_index;
+  bool wordvec_dim;
+  bool hidden_dim;
+} _ModelInfo__isset;
 
-class Status {
+class ModelInfo {
  public:
 
-  static const char* ascii_fingerprint; // = "ACBC8ECF4940BD768FA35CCD08154770";
-  static const uint8_t binary_fingerprint[16]; // = {0xAC,0xBC,0x8E,0xCF,0x49,0x40,0xBD,0x76,0x8F,0xA3,0x5C,0xCD,0x08,0x15,0x47,0x70};
+  static const char* ascii_fingerprint; // = "62CBF95059CB084430B0BABE2E5A68C7";
+  static const uint8_t binary_fingerprint[16]; // = {0x62,0xCB,0xF9,0x50,0x59,0xCB,0x08,0x44,0x30,0xB0,0xBA,0xBE,0x2E,0x5A,0x68,0xC7};
 
-  Status() : leader_id(0) {
+  ModelInfo() : window_size(0), vocab_size(0), start_token_index(0), end_token_index(0), wordvec_dim(0), hidden_dim(0) {
   }
 
-  virtual ~Status() throw() {}
+  virtual ~ModelInfo() throw() {}
 
-  int32_t leader_id;
-  std::vector<int32_t>  param_server_ids;
+  int32_t window_size;
+  int32_t vocab_size;
+  int32_t start_token_index;
+  int32_t end_token_index;
+  int32_t wordvec_dim;
+  int32_t hidden_dim;
 
-  _Status__isset __isset;
+  _ModelInfo__isset __isset;
 
-  void __set_leader_id(const int32_t val) {
-    leader_id = val;
+  void __set_window_size(const int32_t val) {
+    window_size = val;
   }
 
-  void __set_param_server_ids(const std::vector<int32_t> & val) {
-    param_server_ids = val;
+  void __set_vocab_size(const int32_t val) {
+    vocab_size = val;
   }
 
-  bool operator == (const Status & rhs) const
+  void __set_start_token_index(const int32_t val) {
+    start_token_index = val;
+  }
+
+  void __set_end_token_index(const int32_t val) {
+    end_token_index = val;
+  }
+
+  void __set_wordvec_dim(const int32_t val) {
+    wordvec_dim = val;
+  }
+
+  void __set_hidden_dim(const int32_t val) {
+    hidden_dim = val;
+  }
+
+  bool operator == (const ModelInfo & rhs) const
   {
-    if (!(leader_id == rhs.leader_id))
+    if (!(window_size == rhs.window_size))
       return false;
-    if (!(param_server_ids == rhs.param_server_ids))
+    if (!(vocab_size == rhs.vocab_size))
+      return false;
+    if (!(start_token_index == rhs.start_token_index))
+      return false;
+    if (!(end_token_index == rhs.end_token_index))
+      return false;
+    if (!(wordvec_dim == rhs.wordvec_dim))
+      return false;
+    if (!(hidden_dim == rhs.hidden_dim))
       return false;
     return true;
   }
-  bool operator != (const Status &rhs) const {
+  bool operator != (const ModelInfo &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Status & ) const;
+  bool operator < (const ModelInfo & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-void swap(Status &a, Status &b);
+void swap(ModelInfo &a, ModelInfo &b);
+
+typedef struct _Params__isset {
+  _Params__isset() : wordvec_weights(false), input_hidden_weights(false), input_hidden_biases(false), hidden_output_weights(false), hidden_output_biases(false) {}
+  bool wordvec_weights;
+  bool input_hidden_weights;
+  bool input_hidden_biases;
+  bool hidden_output_weights;
+  bool hidden_output_biases;
+} _Params__isset;
+
+class Params {
+ public:
+
+  static const char* ascii_fingerprint; // = "882E5A0F5FB0D66D6CADC597860F19AF";
+  static const uint8_t binary_fingerprint[16]; // = {0x88,0x2E,0x5A,0x0F,0x5F,0xB0,0xD6,0x6D,0x6C,0xAD,0xC5,0x97,0x86,0x0F,0x19,0xAF};
+
+  Params() {
+  }
+
+  virtual ~Params() throw() {}
+
+  std::vector<double>  wordvec_weights;
+  std::vector<double>  input_hidden_weights;
+  std::vector<double>  input_hidden_biases;
+  std::vector<double>  hidden_output_weights;
+  std::vector<double>  hidden_output_biases;
+
+  _Params__isset __isset;
+
+  void __set_wordvec_weights(const std::vector<double> & val) {
+    wordvec_weights = val;
+  }
+
+  void __set_input_hidden_weights(const std::vector<double> & val) {
+    input_hidden_weights = val;
+  }
+
+  void __set_input_hidden_biases(const std::vector<double> & val) {
+    input_hidden_biases = val;
+  }
+
+  void __set_hidden_output_weights(const std::vector<double> & val) {
+    hidden_output_weights = val;
+  }
+
+  void __set_hidden_output_biases(const std::vector<double> & val) {
+    hidden_output_biases = val;
+  }
+
+  bool operator == (const Params & rhs) const
+  {
+    if (!(wordvec_weights == rhs.wordvec_weights))
+      return false;
+    if (!(input_hidden_weights == rhs.input_hidden_weights))
+      return false;
+    if (!(input_hidden_biases == rhs.input_hidden_biases))
+      return false;
+    if (!(hidden_output_weights == rhs.hidden_output_weights))
+      return false;
+    if (!(hidden_output_biases == rhs.hidden_output_biases))
+      return false;
+    return true;
+  }
+  bool operator != (const Params &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Params & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+void swap(Params &a, Params &b);
+
+typedef struct _ServerInfo__isset {
+  _ServerInfo__isset() : ip(false), port(false) {}
+  bool ip;
+  bool port;
+} _ServerInfo__isset;
+
+class ServerInfo {
+ public:
+
+  static const char* ascii_fingerprint; // = "EEBC915CE44901401D881E6091423036";
+  static const uint8_t binary_fingerprint[16]; // = {0xEE,0xBC,0x91,0x5C,0xE4,0x49,0x01,0x40,0x1D,0x88,0x1E,0x60,0x91,0x42,0x30,0x36};
+
+  ServerInfo() : ip(), port(0) {
+  }
+
+  virtual ~ServerInfo() throw() {}
+
+  std::string ip;
+  int32_t port;
+
+  _ServerInfo__isset __isset;
+
+  void __set_ip(const std::string& val) {
+    ip = val;
+  }
+
+  void __set_port(const int32_t val) {
+    port = val;
+  }
+
+  bool operator == (const ServerInfo & rhs) const
+  {
+    if (!(ip == rhs.ip))
+      return false;
+    if (!(port == rhs.port))
+      return false;
+    return true;
+  }
+  bool operator != (const ServerInfo &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const ServerInfo & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+void swap(ServerInfo &a, ServerInfo &b);
+
+typedef struct _AnnounceRequest__isset {
+  _AnnounceRequest__isset() : worker_info(false) {}
+  bool worker_info;
+} _AnnounceRequest__isset;
+
+class AnnounceRequest {
+ public:
+
+  static const char* ascii_fingerprint; // = "2BD9E1CC52BCB0899198EEADB3593B00";
+  static const uint8_t binary_fingerprint[16]; // = {0x2B,0xD9,0xE1,0xCC,0x52,0xBC,0xB0,0x89,0x91,0x98,0xEE,0xAD,0xB3,0x59,0x3B,0x00};
+
+  AnnounceRequest() {
+  }
+
+  virtual ~AnnounceRequest() throw() {}
+
+  ServerInfo worker_info;
+
+  _AnnounceRequest__isset __isset;
+
+  void __set_worker_info(const ServerInfo& val) {
+    worker_info = val;
+  }
+
+  bool operator == (const AnnounceRequest & rhs) const
+  {
+    if (!(worker_info == rhs.worker_info))
+      return false;
+    return true;
+  }
+  bool operator != (const AnnounceRequest &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const AnnounceRequest & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+void swap(AnnounceRequest &a, AnnounceRequest &b);
+
+typedef struct _AnnounceResponse__isset {
+  _AnnounceResponse__isset() : model_info(false), params(false), shard_paths(false), learn_rate(false), param_servers(false) {}
+  bool model_info;
+  bool params;
+  bool shard_paths;
+  bool learn_rate;
+  bool param_servers;
+} _AnnounceResponse__isset;
+
+class AnnounceResponse {
+ public:
+
+  static const char* ascii_fingerprint; // = "AFBEB144070F2944B0ABB54DD68305D0";
+  static const uint8_t binary_fingerprint[16]; // = {0xAF,0xBE,0xB1,0x44,0x07,0x0F,0x29,0x44,0xB0,0xAB,0xB5,0x4D,0xD6,0x83,0x05,0xD0};
+
+  AnnounceResponse() : learn_rate(0) {
+  }
+
+  virtual ~AnnounceResponse() throw() {}
+
+  ModelInfo model_info;
+  Params params;
+  std::vector<std::string>  shard_paths;
+  double learn_rate;
+  std::vector<ServerInfo>  param_servers;
+
+  _AnnounceResponse__isset __isset;
+
+  void __set_model_info(const ModelInfo& val) {
+    model_info = val;
+  }
+
+  void __set_params(const Params& val) {
+    params = val;
+  }
+
+  void __set_shard_paths(const std::vector<std::string> & val) {
+    shard_paths = val;
+  }
+
+  void __set_learn_rate(const double val) {
+    learn_rate = val;
+  }
+
+  void __set_param_servers(const std::vector<ServerInfo> & val) {
+    param_servers = val;
+  }
+
+  bool operator == (const AnnounceResponse & rhs) const
+  {
+    if (!(model_info == rhs.model_info))
+      return false;
+    if (!(params == rhs.params))
+      return false;
+    if (!(shard_paths == rhs.shard_paths))
+      return false;
+    if (!(learn_rate == rhs.learn_rate))
+      return false;
+    if (!(param_servers == rhs.param_servers))
+      return false;
+    return true;
+  }
+  bool operator != (const AnnounceResponse &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const AnnounceResponse & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+void swap(AnnounceResponse &a, AnnounceResponse &b);
+
+typedef struct _UpdateRequest__isset {
+  _UpdateRequest__isset() : update(false), worker_info(false) {}
+  bool update;
+  bool worker_info;
+} _UpdateRequest__isset;
+
+class UpdateRequest {
+ public:
+
+  static const char* ascii_fingerprint; // = "5252BFD9FD3B10A47FE26840939EECE6";
+  static const uint8_t binary_fingerprint[16]; // = {0x52,0x52,0xBF,0xD9,0xFD,0x3B,0x10,0xA4,0x7F,0xE2,0x68,0x40,0x93,0x9E,0xEC,0xE6};
+
+  UpdateRequest() {
+  }
+
+  virtual ~UpdateRequest() throw() {}
+
+  Params update;
+  ServerInfo worker_info;
+
+  _UpdateRequest__isset __isset;
+
+  void __set_update(const Params& val) {
+    update = val;
+  }
+
+  void __set_worker_info(const ServerInfo& val) {
+    worker_info = val;
+    __isset.worker_info = true;
+  }
+
+  bool operator == (const UpdateRequest & rhs) const
+  {
+    if (!(update == rhs.update))
+      return false;
+    if (__isset.worker_info != rhs.__isset.worker_info)
+      return false;
+    else if (__isset.worker_info && !(worker_info == rhs.worker_info))
+      return false;
+    return true;
+  }
+  bool operator != (const UpdateRequest &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const UpdateRequest & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+void swap(UpdateRequest &a, UpdateRequest &b);
+
+typedef struct _UpdateResponse__isset {
+  _UpdateResponse__isset() : param_servers(false) {}
+  bool param_servers;
+} _UpdateResponse__isset;
+
+class UpdateResponse {
+ public:
+
+  static const char* ascii_fingerprint; // = "E3BAB2DD3B420D9247DE4278A71DC1B0";
+  static const uint8_t binary_fingerprint[16]; // = {0xE3,0xBA,0xB2,0xDD,0x3B,0x42,0x0D,0x92,0x47,0xDE,0x42,0x78,0xA7,0x1D,0xC1,0xB0};
+
+  UpdateResponse() {
+  }
+
+  virtual ~UpdateResponse() throw() {}
+
+  std::vector<ServerInfo>  param_servers;
+
+  _UpdateResponse__isset __isset;
+
+  void __set_param_servers(const std::vector<ServerInfo> & val) {
+    param_servers = val;
+    __isset.param_servers = true;
+  }
+
+  bool operator == (const UpdateResponse & rhs) const
+  {
+    if (__isset.param_servers != rhs.__isset.param_servers)
+      return false;
+    else if (__isset.param_servers && !(param_servers == rhs.param_servers))
+      return false;
+    return true;
+  }
+  bool operator != (const UpdateResponse &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const UpdateResponse & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+void swap(UpdateResponse &a, UpdateResponse &b);
+
+typedef struct _PullRequest__isset {
+  _PullRequest__isset() : worker_info(false) {}
+  bool worker_info;
+} _PullRequest__isset;
+
+class PullRequest {
+ public:
+
+  static const char* ascii_fingerprint; // = "45F07C5FAF8C5003DA143A45C267ADFE";
+  static const uint8_t binary_fingerprint[16]; // = {0x45,0xF0,0x7C,0x5F,0xAF,0x8C,0x50,0x03,0xDA,0x14,0x3A,0x45,0xC2,0x67,0xAD,0xFE};
+
+  PullRequest() {
+  }
+
+  virtual ~PullRequest() throw() {}
+
+  ServerInfo worker_info;
+
+  _PullRequest__isset __isset;
+
+  void __set_worker_info(const ServerInfo& val) {
+    worker_info = val;
+    __isset.worker_info = true;
+  }
+
+  bool operator == (const PullRequest & rhs) const
+  {
+    if (__isset.worker_info != rhs.__isset.worker_info)
+      return false;
+    else if (__isset.worker_info && !(worker_info == rhs.worker_info))
+      return false;
+    return true;
+  }
+  bool operator != (const PullRequest &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const PullRequest & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+void swap(PullRequest &a, PullRequest &b);
+
+typedef struct _PullResponse__isset {
+  _PullResponse__isset() : params(false), param_servers(false) {}
+  bool params;
+  bool param_servers;
+} _PullResponse__isset;
+
+class PullResponse {
+ public:
+
+  static const char* ascii_fingerprint; // = "76FE0E92C52E0EC69A75E4CF3AE83DEF";
+  static const uint8_t binary_fingerprint[16]; // = {0x76,0xFE,0x0E,0x92,0xC5,0x2E,0x0E,0xC6,0x9A,0x75,0xE4,0xCF,0x3A,0xE8,0x3D,0xEF};
+
+  PullResponse() {
+  }
+
+  virtual ~PullResponse() throw() {}
+
+  Params params;
+  std::vector<ServerInfo>  param_servers;
+
+  _PullResponse__isset __isset;
+
+  void __set_params(const Params& val) {
+    params = val;
+  }
+
+  void __set_param_servers(const std::vector<ServerInfo> & val) {
+    param_servers = val;
+    __isset.param_servers = true;
+  }
+
+  bool operator == (const PullResponse & rhs) const
+  {
+    if (!(params == rhs.params))
+      return false;
+    if (__isset.param_servers != rhs.__isset.param_servers)
+      return false;
+    else if (__isset.param_servers && !(param_servers == rhs.param_servers))
+      return false;
+    return true;
+  }
+  bool operator != (const PullResponse &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const PullResponse & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+void swap(PullResponse &a, PullResponse &b);
 
 typedef struct _HBRequest__isset {
-  _HBRequest__isset() : status(false) {}
-  bool status;
+  _HBRequest__isset() : master_info(false) {}
+  bool master_info;
 } _HBRequest__isset;
 
 class HBRequest {
  public:
 
-  static const char* ascii_fingerprint; // = "14CB0077E1682B2DE4BE78E81E7629A8";
-  static const uint8_t binary_fingerprint[16]; // = {0x14,0xCB,0x00,0x77,0xE1,0x68,0x2B,0x2D,0xE4,0xBE,0x78,0xE8,0x1E,0x76,0x29,0xA8};
+  static const char* ascii_fingerprint; // = "45F07C5FAF8C5003DA143A45C267ADFE";
+  static const uint8_t binary_fingerprint[16]; // = {0x45,0xF0,0x7C,0x5F,0xAF,0x8C,0x50,0x03,0xDA,0x14,0x3A,0x45,0xC2,0x67,0xAD,0xFE};
 
   HBRequest() {
   }
 
   virtual ~HBRequest() throw() {}
 
-  Status status;
+  ServerInfo master_info;
 
   _HBRequest__isset __isset;
 
-  void __set_status(const Status& val) {
-    status = val;
-    __isset.status = true;
+  void __set_master_info(const ServerInfo& val) {
+    master_info = val;
+    __isset.master_info = true;
   }
 
   bool operator == (const HBRequest & rhs) const
   {
-    if (__isset.status != rhs.__isset.status)
+    if (__isset.master_info != rhs.__isset.master_info)
       return false;
-    else if (__isset.status && !(status == rhs.status))
+    else if (__isset.master_info && !(master_info == rhs.master_info))
       return false;
     return true;
   }
@@ -115,35 +591,35 @@ class HBRequest {
 void swap(HBRequest &a, HBRequest &b);
 
 typedef struct _HBResponse__isset {
-  _HBResponse__isset() : worker_id(false) {}
-  bool worker_id;
+  _HBResponse__isset() : worker_info(false) {}
+  bool worker_info;
 } _HBResponse__isset;
 
 class HBResponse {
  public:
 
-  static const char* ascii_fingerprint; // = "E7A96B151330359E84C0A3AC91BCBACD";
-  static const uint8_t binary_fingerprint[16]; // = {0xE7,0xA9,0x6B,0x15,0x13,0x30,0x35,0x9E,0x84,0xC0,0xA3,0xAC,0x91,0xBC,0xBA,0xCD};
+  static const char* ascii_fingerprint; // = "45F07C5FAF8C5003DA143A45C267ADFE";
+  static const uint8_t binary_fingerprint[16]; // = {0x45,0xF0,0x7C,0x5F,0xAF,0x8C,0x50,0x03,0xDA,0x14,0x3A,0x45,0xC2,0x67,0xAD,0xFE};
 
-  HBResponse() : worker_id(0) {
+  HBResponse() {
   }
 
   virtual ~HBResponse() throw() {}
 
-  int32_t worker_id;
+  ServerInfo worker_info;
 
   _HBResponse__isset __isset;
 
-  void __set_worker_id(const int32_t val) {
-    worker_id = val;
-    __isset.worker_id = true;
+  void __set_worker_info(const ServerInfo& val) {
+    worker_info = val;
+    __isset.worker_info = true;
   }
 
   bool operator == (const HBResponse & rhs) const
   {
-    if (__isset.worker_id != rhs.__isset.worker_id)
+    if (__isset.worker_info != rhs.__isset.worker_info)
       return false;
-    else if (__isset.worker_id && !(worker_id == rhs.worker_id))
+    else if (__isset.worker_info && !(worker_info == rhs.worker_info))
       return false;
     return true;
   }
@@ -161,29 +637,29 @@ class HBResponse {
 void swap(HBResponse &a, HBResponse &b);
 
 typedef struct _StartRequest__isset {
-  _StartRequest__isset() : shard_path(false), learn_rate(false) {}
-  bool shard_path;
+  _StartRequest__isset() : shard_paths(false), learn_rate(false) {}
+  bool shard_paths;
   bool learn_rate;
 } _StartRequest__isset;
 
 class StartRequest {
  public:
 
-  static const char* ascii_fingerprint; // = "C712EF0DA8599E55DF4D0F13415232EF";
-  static const uint8_t binary_fingerprint[16]; // = {0xC7,0x12,0xEF,0x0D,0xA8,0x59,0x9E,0x55,0xDF,0x4D,0x0F,0x13,0x41,0x52,0x32,0xEF};
+  static const char* ascii_fingerprint; // = "F96E9B21D37ECC1E6B1D9CC351B177C9";
+  static const uint8_t binary_fingerprint[16]; // = {0xF9,0x6E,0x9B,0x21,0xD3,0x7E,0xCC,0x1E,0x6B,0x1D,0x9C,0xC3,0x51,0xB1,0x77,0xC9};
 
-  StartRequest() : shard_path(), learn_rate(0) {
+  StartRequest() : learn_rate(0) {
   }
 
   virtual ~StartRequest() throw() {}
 
-  std::string shard_path;
+  std::vector<std::string>  shard_paths;
   double learn_rate;
 
   _StartRequest__isset __isset;
 
-  void __set_shard_path(const std::string& val) {
-    shard_path = val;
+  void __set_shard_paths(const std::vector<std::string> & val) {
+    shard_paths = val;
   }
 
   void __set_learn_rate(const double val) {
@@ -192,7 +668,7 @@ class StartRequest {
 
   bool operator == (const StartRequest & rhs) const
   {
-    if (!(shard_path == rhs.shard_path))
+    if (!(shard_paths == rhs.shard_paths))
       return false;
     if (!(learn_rate == rhs.learn_rate))
       return false;
@@ -210,6 +686,49 @@ class StartRequest {
 };
 
 void swap(StartRequest &a, StartRequest &b);
+
+typedef struct _ReassignRequest__isset {
+  _ReassignRequest__isset() : shard_paths(false) {}
+  bool shard_paths;
+} _ReassignRequest__isset;
+
+class ReassignRequest {
+ public:
+
+  static const char* ascii_fingerprint; // = "ACE4F644F0FDD289DDC4EE5B83BC13C0";
+  static const uint8_t binary_fingerprint[16]; // = {0xAC,0xE4,0xF6,0x44,0xF0,0xFD,0xD2,0x89,0xDD,0xC4,0xEE,0x5B,0x83,0xBC,0x13,0xC0};
+
+  ReassignRequest() {
+  }
+
+  virtual ~ReassignRequest() throw() {}
+
+  std::vector<std::string>  shard_paths;
+
+  _ReassignRequest__isset __isset;
+
+  void __set_shard_paths(const std::vector<std::string> & val) {
+    shard_paths = val;
+  }
+
+  bool operator == (const ReassignRequest & rhs) const
+  {
+    if (!(shard_paths == rhs.shard_paths))
+      return false;
+    return true;
+  }
+  bool operator != (const ReassignRequest &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const ReassignRequest & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+void swap(ReassignRequest &a, ReassignRequest &b);
 
 } // namespace
 

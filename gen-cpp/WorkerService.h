@@ -18,6 +18,7 @@ class WorkerServiceIf {
   virtual void heartbeat(HBResponse& _return, const HBRequest& request) = 0;
   virtual void start(const StartRequest& request) = 0;
   virtual void stop() = 0;
+  virtual void reassign(const ReassignRequest& request) = 0;
 };
 
 class WorkerServiceIfFactory {
@@ -54,6 +55,9 @@ class WorkerServiceNull : virtual public WorkerServiceIf {
     return;
   }
   void stop() {
+    return;
+  }
+  void reassign(const ReassignRequest& /* request */) {
     return;
   }
 };
@@ -328,6 +332,94 @@ class WorkerService_stop_presult {
 
 };
 
+typedef struct _WorkerService_reassign_args__isset {
+  _WorkerService_reassign_args__isset() : request(false) {}
+  bool request;
+} _WorkerService_reassign_args__isset;
+
+class WorkerService_reassign_args {
+ public:
+
+  WorkerService_reassign_args() {
+  }
+
+  virtual ~WorkerService_reassign_args() throw() {}
+
+  ReassignRequest request;
+
+  _WorkerService_reassign_args__isset __isset;
+
+  void __set_request(const ReassignRequest& val) {
+    request = val;
+  }
+
+  bool operator == (const WorkerService_reassign_args & rhs) const
+  {
+    if (!(request == rhs.request))
+      return false;
+    return true;
+  }
+  bool operator != (const WorkerService_reassign_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const WorkerService_reassign_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class WorkerService_reassign_pargs {
+ public:
+
+
+  virtual ~WorkerService_reassign_pargs() throw() {}
+
+  const ReassignRequest* request;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class WorkerService_reassign_result {
+ public:
+
+  WorkerService_reassign_result() {
+  }
+
+  virtual ~WorkerService_reassign_result() throw() {}
+
+
+  bool operator == (const WorkerService_reassign_result & /* rhs */) const
+  {
+    return true;
+  }
+  bool operator != (const WorkerService_reassign_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const WorkerService_reassign_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class WorkerService_reassign_presult {
+ public:
+
+
+  virtual ~WorkerService_reassign_presult() throw() {}
+
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
 class WorkerServiceClient : virtual public WorkerServiceIf {
  public:
   WorkerServiceClient(boost::shared_ptr< ::apache::thrift::protocol::TProtocol> prot) :
@@ -357,6 +449,9 @@ class WorkerServiceClient : virtual public WorkerServiceIf {
   void stop();
   void send_stop();
   void recv_stop();
+  void reassign(const ReassignRequest& request);
+  void send_reassign(const ReassignRequest& request);
+  void recv_reassign();
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> poprot_;
@@ -375,12 +470,14 @@ class WorkerServiceProcessor : public ::apache::thrift::TDispatchProcessor {
   void process_heartbeat(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_start(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_stop(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_reassign(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
  public:
   WorkerServiceProcessor(boost::shared_ptr<WorkerServiceIf> iface) :
     iface_(iface) {
     processMap_["heartbeat"] = &WorkerServiceProcessor::process_heartbeat;
     processMap_["start"] = &WorkerServiceProcessor::process_start;
     processMap_["stop"] = &WorkerServiceProcessor::process_stop;
+    processMap_["reassign"] = &WorkerServiceProcessor::process_reassign;
   }
 
   virtual ~WorkerServiceProcessor() {}
@@ -435,6 +532,15 @@ class WorkerServiceMultiface : virtual public WorkerServiceIf {
       ifaces_[i]->stop();
     }
     ifaces_[i]->stop();
+  }
+
+  void reassign(const ReassignRequest& request) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->reassign(request);
+    }
+    ifaces_[i]->reassign(request);
   }
 
 };

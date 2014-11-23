@@ -16,7 +16,13 @@ using boost::shared_ptr;
 
 using namespace distrust;
 
-WorkerServiceHandler::WorkerServiceHandler() {
+WorkerServiceHandler::WorkerServiceHandler(
+    const std::string& master_ip,
+    int master_port) :
+  _master_ip(master_ip),
+  _master_port(master_port)  {
+
+  
 
 }
 
@@ -25,7 +31,9 @@ WorkerServiceHandler::~WorkerServiceHandler() {
 }
 
 void
-WorkerServiceHandler::heartbeat(HBResponse& _return, const HBRequest& request) {
+WorkerServiceHandler::heartbeat(
+  HBResponse& _return,
+  const HBRequest& request) {
 
 }
 
@@ -36,6 +44,11 @@ WorkerServiceHandler::start(const StartRequest& request) {
 
 void
 WorkerServiceHandler::stop() {
+
+}
+
+void
+WorkerServiceHandler::reassign(const ReassignRequest& request) {
 
 }
 
@@ -85,7 +98,7 @@ main(int argc, char **argv) {
   std::cout << "Master IP: " << master_ip << std::endl;
   std::cout << "Master port: " << master_port << std::endl;
 
-  shared_ptr<WorkerServiceHandler> handler(new WorkerServiceHandler());
+  shared_ptr<WorkerServiceHandler> handler(new WorkerServiceHandler(master_ip, master_port));
   shared_ptr<TProcessor> processor(new WorkerServiceProcessor(handler));
   shared_ptr<TServerTransport> serverTransport(new TServerSocket(worker_port));
   shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());

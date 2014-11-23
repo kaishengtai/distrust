@@ -4,11 +4,11 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#include "WorkerService.h"
+#include "ParamService.h"
 
 namespace distrust {
 
-uint32_t WorkerService_heartbeat_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t ParamService_announce_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   uint32_t xfer = 0;
   std::string fname;
@@ -48,9 +48,9 @@ uint32_t WorkerService_heartbeat_args::read(::apache::thrift::protocol::TProtoco
   return xfer;
 }
 
-uint32_t WorkerService_heartbeat_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t ParamService_announce_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("WorkerService_heartbeat_args");
+  xfer += oprot->writeStructBegin("ParamService_announce_args");
 
   xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
   xfer += this->request.write(oprot);
@@ -61,9 +61,9 @@ uint32_t WorkerService_heartbeat_args::write(::apache::thrift::protocol::TProtoc
   return xfer;
 }
 
-uint32_t WorkerService_heartbeat_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t ParamService_announce_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("WorkerService_heartbeat_pargs");
+  xfer += oprot->writeStructBegin("ParamService_announce_pargs");
 
   xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
   xfer += (*(this->request)).write(oprot);
@@ -74,7 +74,7 @@ uint32_t WorkerService_heartbeat_pargs::write(::apache::thrift::protocol::TProto
   return xfer;
 }
 
-uint32_t WorkerService_heartbeat_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t ParamService_announce_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   uint32_t xfer = 0;
   std::string fname;
@@ -114,11 +114,11 @@ uint32_t WorkerService_heartbeat_result::read(::apache::thrift::protocol::TProto
   return xfer;
 }
 
-uint32_t WorkerService_heartbeat_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t ParamService_announce_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("WorkerService_heartbeat_result");
+  xfer += oprot->writeStructBegin("ParamService_announce_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRUCT, 0);
@@ -130,7 +130,7 @@ uint32_t WorkerService_heartbeat_result::write(::apache::thrift::protocol::TProt
   return xfer;
 }
 
-uint32_t WorkerService_heartbeat_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t ParamService_announce_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   uint32_t xfer = 0;
   std::string fname;
@@ -170,7 +170,7 @@ uint32_t WorkerService_heartbeat_presult::read(::apache::thrift::protocol::TProt
   return xfer;
 }
 
-uint32_t WorkerService_start_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t ParamService_push_update_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   uint32_t xfer = 0;
   std::string fname;
@@ -210,9 +210,9 @@ uint32_t WorkerService_start_args::read(::apache::thrift::protocol::TProtocol* i
   return xfer;
 }
 
-uint32_t WorkerService_start_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t ParamService_push_update_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("WorkerService_start_args");
+  xfer += oprot->writeStructBegin("ParamService_push_update_args");
 
   xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
   xfer += this->request.write(oprot);
@@ -223,9 +223,9 @@ uint32_t WorkerService_start_args::write(::apache::thrift::protocol::TProtocol* 
   return xfer;
 }
 
-uint32_t WorkerService_start_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t ParamService_push_update_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("WorkerService_start_pargs");
+  xfer += oprot->writeStructBegin("ParamService_push_update_pargs");
 
   xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
   xfer += (*(this->request)).write(oprot);
@@ -236,7 +236,7 @@ uint32_t WorkerService_start_pargs::write(::apache::thrift::protocol::TProtocol*
   return xfer;
 }
 
-uint32_t WorkerService_start_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t ParamService_push_update_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   uint32_t xfer = 0;
   std::string fname;
@@ -254,7 +254,20 @@ uint32_t WorkerService_start_result::read(::apache::thrift::protocol::TProtocol*
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    xfer += iprot->skip(ftype);
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->success.read(iprot);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
     xfer += iprot->readFieldEnd();
   }
 
@@ -263,18 +276,23 @@ uint32_t WorkerService_start_result::read(::apache::thrift::protocol::TProtocol*
   return xfer;
 }
 
-uint32_t WorkerService_start_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t ParamService_push_update_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("WorkerService_start_result");
+  xfer += oprot->writeStructBegin("ParamService_push_update_result");
 
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRUCT, 0);
+    xfer += this->success.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
 }
 
-uint32_t WorkerService_start_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t ParamService_push_update_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   uint32_t xfer = 0;
   std::string fname;
@@ -292,34 +310,20 @@ uint32_t WorkerService_start_presult::read(::apache::thrift::protocol::TProtocol
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    xfer += iprot->skip(ftype);
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t WorkerService_stop_args::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += (*(this->success)).read(iprot);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
     }
-    xfer += iprot->skip(ftype);
     xfer += iprot->readFieldEnd();
   }
 
@@ -328,90 +332,7 @@ uint32_t WorkerService_stop_args::read(::apache::thrift::protocol::TProtocol* ip
   return xfer;
 }
 
-uint32_t WorkerService_stop_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
-  uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("WorkerService_stop_args");
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-uint32_t WorkerService_stop_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
-  uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("WorkerService_stop_pargs");
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-uint32_t WorkerService_stop_result::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    xfer += iprot->skip(ftype);
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t WorkerService_stop_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
-
-  uint32_t xfer = 0;
-
-  xfer += oprot->writeStructBegin("WorkerService_stop_result");
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-uint32_t WorkerService_stop_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    xfer += iprot->skip(ftype);
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t WorkerService_reassign_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t ParamService_pull_params_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   uint32_t xfer = 0;
   std::string fname;
@@ -451,9 +372,9 @@ uint32_t WorkerService_reassign_args::read(::apache::thrift::protocol::TProtocol
   return xfer;
 }
 
-uint32_t WorkerService_reassign_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t ParamService_pull_params_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("WorkerService_reassign_args");
+  xfer += oprot->writeStructBegin("ParamService_pull_params_args");
 
   xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
   xfer += this->request.write(oprot);
@@ -464,9 +385,9 @@ uint32_t WorkerService_reassign_args::write(::apache::thrift::protocol::TProtoco
   return xfer;
 }
 
-uint32_t WorkerService_reassign_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t ParamService_pull_params_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("WorkerService_reassign_pargs");
+  xfer += oprot->writeStructBegin("ParamService_pull_params_pargs");
 
   xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
   xfer += (*(this->request)).write(oprot);
@@ -477,7 +398,7 @@ uint32_t WorkerService_reassign_pargs::write(::apache::thrift::protocol::TProtoc
   return xfer;
 }
 
-uint32_t WorkerService_reassign_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t ParamService_pull_params_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   uint32_t xfer = 0;
   std::string fname;
@@ -495,7 +416,20 @@ uint32_t WorkerService_reassign_result::read(::apache::thrift::protocol::TProtoc
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    xfer += iprot->skip(ftype);
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->success.read(iprot);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
     xfer += iprot->readFieldEnd();
   }
 
@@ -504,18 +438,23 @@ uint32_t WorkerService_reassign_result::read(::apache::thrift::protocol::TProtoc
   return xfer;
 }
 
-uint32_t WorkerService_reassign_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t ParamService_pull_params_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("WorkerService_reassign_result");
+  xfer += oprot->writeStructBegin("ParamService_pull_params_result");
 
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRUCT, 0);
+    xfer += this->success.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
 }
 
-uint32_t WorkerService_reassign_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t ParamService_pull_params_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   uint32_t xfer = 0;
   std::string fname;
@@ -533,7 +472,20 @@ uint32_t WorkerService_reassign_presult::read(::apache::thrift::protocol::TProto
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    xfer += iprot->skip(ftype);
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += (*(this->success)).read(iprot);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
     xfer += iprot->readFieldEnd();
   }
 
@@ -542,18 +494,18 @@ uint32_t WorkerService_reassign_presult::read(::apache::thrift::protocol::TProto
   return xfer;
 }
 
-void WorkerServiceClient::heartbeat(HBResponse& _return, const HBRequest& request)
+void ParamServiceClient::announce(AnnounceResponse& _return, const AnnounceRequest& request)
 {
-  send_heartbeat(request);
-  recv_heartbeat(_return);
+  send_announce(request);
+  recv_announce(_return);
 }
 
-void WorkerServiceClient::send_heartbeat(const HBRequest& request)
+void ParamServiceClient::send_announce(const AnnounceRequest& request)
 {
   int32_t cseqid = 0;
-  oprot_->writeMessageBegin("heartbeat", ::apache::thrift::protocol::T_CALL, cseqid);
+  oprot_->writeMessageBegin("announce", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  WorkerService_heartbeat_pargs args;
+  ParamService_announce_pargs args;
   args.request = &request;
   args.write(oprot_);
 
@@ -562,7 +514,7 @@ void WorkerServiceClient::send_heartbeat(const HBRequest& request)
   oprot_->getTransport()->flush();
 }
 
-void WorkerServiceClient::recv_heartbeat(HBResponse& _return)
+void ParamServiceClient::recv_announce(AnnounceResponse& _return)
 {
 
   int32_t rseqid = 0;
@@ -582,12 +534,12 @@ void WorkerServiceClient::recv_heartbeat(HBResponse& _return)
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("heartbeat") != 0) {
+  if (fname.compare("announce") != 0) {
     iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  WorkerService_heartbeat_presult result;
+  ParamService_announce_presult result;
   result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
@@ -597,21 +549,21 @@ void WorkerServiceClient::recv_heartbeat(HBResponse& _return)
     // _return pointer has now been filled
     return;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "heartbeat failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "announce failed: unknown result");
 }
 
-void WorkerServiceClient::start(const StartRequest& request)
+void ParamServiceClient::push_update(UpdateResponse& _return, const UpdateRequest& request)
 {
-  send_start(request);
-  recv_start();
+  send_push_update(request);
+  recv_push_update(_return);
 }
 
-void WorkerServiceClient::send_start(const StartRequest& request)
+void ParamServiceClient::send_push_update(const UpdateRequest& request)
 {
   int32_t cseqid = 0;
-  oprot_->writeMessageBegin("start", ::apache::thrift::protocol::T_CALL, cseqid);
+  oprot_->writeMessageBegin("push_update", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  WorkerService_start_pargs args;
+  ParamService_push_update_pargs args;
   args.request = &request;
   args.write(oprot_);
 
@@ -620,7 +572,7 @@ void WorkerServiceClient::send_start(const StartRequest& request)
   oprot_->getTransport()->flush();
 }
 
-void WorkerServiceClient::recv_start()
+void ParamServiceClient::recv_push_update(UpdateResponse& _return)
 {
 
   int32_t rseqid = 0;
@@ -640,83 +592,36 @@ void WorkerServiceClient::recv_start()
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("start") != 0) {
+  if (fname.compare("push_update") != 0) {
     iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  WorkerService_start_presult result;
+  ParamService_push_update_presult result;
+  result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
   iprot_->getTransport()->readEnd();
 
-  return;
+  if (result.__isset.success) {
+    // _return pointer has now been filled
+    return;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "push_update failed: unknown result");
 }
 
-void WorkerServiceClient::stop()
+void ParamServiceClient::pull_params(PullResponse& _return, const PullRequest& request)
 {
-  send_stop();
-  recv_stop();
+  send_pull_params(request);
+  recv_pull_params(_return);
 }
 
-void WorkerServiceClient::send_stop()
+void ParamServiceClient::send_pull_params(const PullRequest& request)
 {
   int32_t cseqid = 0;
-  oprot_->writeMessageBegin("stop", ::apache::thrift::protocol::T_CALL, cseqid);
+  oprot_->writeMessageBegin("pull_params", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  WorkerService_stop_pargs args;
-  args.write(oprot_);
-
-  oprot_->writeMessageEnd();
-  oprot_->getTransport()->writeEnd();
-  oprot_->getTransport()->flush();
-}
-
-void WorkerServiceClient::recv_stop()
-{
-
-  int32_t rseqid = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TMessageType mtype;
-
-  iprot_->readMessageBegin(fname, mtype, rseqid);
-  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
-    ::apache::thrift::TApplicationException x;
-    x.read(iprot_);
-    iprot_->readMessageEnd();
-    iprot_->getTransport()->readEnd();
-    throw x;
-  }
-  if (mtype != ::apache::thrift::protocol::T_REPLY) {
-    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-    iprot_->readMessageEnd();
-    iprot_->getTransport()->readEnd();
-  }
-  if (fname.compare("stop") != 0) {
-    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-    iprot_->readMessageEnd();
-    iprot_->getTransport()->readEnd();
-  }
-  WorkerService_stop_presult result;
-  result.read(iprot_);
-  iprot_->readMessageEnd();
-  iprot_->getTransport()->readEnd();
-
-  return;
-}
-
-void WorkerServiceClient::reassign(const ReassignRequest& request)
-{
-  send_reassign(request);
-  recv_reassign();
-}
-
-void WorkerServiceClient::send_reassign(const ReassignRequest& request)
-{
-  int32_t cseqid = 0;
-  oprot_->writeMessageBegin("reassign", ::apache::thrift::protocol::T_CALL, cseqid);
-
-  WorkerService_reassign_pargs args;
+  ParamService_pull_params_pargs args;
   args.request = &request;
   args.write(oprot_);
 
@@ -725,7 +630,7 @@ void WorkerServiceClient::send_reassign(const ReassignRequest& request)
   oprot_->getTransport()->flush();
 }
 
-void WorkerServiceClient::recv_reassign()
+void ParamServiceClient::recv_pull_params(PullResponse& _return)
 {
 
   int32_t rseqid = 0;
@@ -745,20 +650,25 @@ void WorkerServiceClient::recv_reassign()
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("reassign") != 0) {
+  if (fname.compare("pull_params") != 0) {
     iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  WorkerService_reassign_presult result;
+  ParamService_pull_params_presult result;
+  result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
   iprot_->getTransport()->readEnd();
 
-  return;
+  if (result.__isset.success) {
+    // _return pointer has now been filled
+    return;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "pull_params failed: unknown result");
 }
 
-bool WorkerServiceProcessor::dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext) {
+bool ParamServiceProcessor::dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext) {
   ProcessMap::iterator pfn;
   pfn = processMap_.find(fname);
   if (pfn == processMap_.end()) {
@@ -777,38 +687,38 @@ bool WorkerServiceProcessor::dispatchCall(::apache::thrift::protocol::TProtocol*
   return true;
 }
 
-void WorkerServiceProcessor::process_heartbeat(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void ParamServiceProcessor::process_announce(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("WorkerService.heartbeat", callContext);
+    ctx = this->eventHandler_->getContext("ParamService.announce", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "WorkerService.heartbeat");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "ParamService.announce");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "WorkerService.heartbeat");
+    this->eventHandler_->preRead(ctx, "ParamService.announce");
   }
 
-  WorkerService_heartbeat_args args;
+  ParamService_announce_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "WorkerService.heartbeat", bytes);
+    this->eventHandler_->postRead(ctx, "ParamService.announce", bytes);
   }
 
-  WorkerService_heartbeat_result result;
+  ParamService_announce_result result;
   try {
-    iface_->heartbeat(result.success, args.request);
+    iface_->announce(result.success, args.request);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "WorkerService.heartbeat");
+      this->eventHandler_->handlerError(ctx, "ParamService.announce");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("heartbeat", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("announce", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -817,51 +727,52 @@ void WorkerServiceProcessor::process_heartbeat(int32_t seqid, ::apache::thrift::
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "WorkerService.heartbeat");
+    this->eventHandler_->preWrite(ctx, "ParamService.announce");
   }
 
-  oprot->writeMessageBegin("heartbeat", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("announce", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "WorkerService.heartbeat", bytes);
+    this->eventHandler_->postWrite(ctx, "ParamService.announce", bytes);
   }
 }
 
-void WorkerServiceProcessor::process_start(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void ParamServiceProcessor::process_push_update(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("WorkerService.start", callContext);
+    ctx = this->eventHandler_->getContext("ParamService.push_update", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "WorkerService.start");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "ParamService.push_update");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "WorkerService.start");
+    this->eventHandler_->preRead(ctx, "ParamService.push_update");
   }
 
-  WorkerService_start_args args;
+  ParamService_push_update_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "WorkerService.start", bytes);
+    this->eventHandler_->postRead(ctx, "ParamService.push_update", bytes);
   }
 
-  WorkerService_start_result result;
+  ParamService_push_update_result result;
   try {
-    iface_->start(args.request);
+    iface_->push_update(result.success, args.request);
+    result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "WorkerService.start");
+      this->eventHandler_->handlerError(ctx, "ParamService.push_update");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("start", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("push_update", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -870,51 +781,52 @@ void WorkerServiceProcessor::process_start(int32_t seqid, ::apache::thrift::prot
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "WorkerService.start");
+    this->eventHandler_->preWrite(ctx, "ParamService.push_update");
   }
 
-  oprot->writeMessageBegin("start", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("push_update", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "WorkerService.start", bytes);
+    this->eventHandler_->postWrite(ctx, "ParamService.push_update", bytes);
   }
 }
 
-void WorkerServiceProcessor::process_stop(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void ParamServiceProcessor::process_pull_params(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("WorkerService.stop", callContext);
+    ctx = this->eventHandler_->getContext("ParamService.pull_params", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "WorkerService.stop");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "ParamService.pull_params");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "WorkerService.stop");
+    this->eventHandler_->preRead(ctx, "ParamService.pull_params");
   }
 
-  WorkerService_stop_args args;
+  ParamService_pull_params_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "WorkerService.stop", bytes);
+    this->eventHandler_->postRead(ctx, "ParamService.pull_params", bytes);
   }
 
-  WorkerService_stop_result result;
+  ParamService_pull_params_result result;
   try {
-    iface_->stop();
+    iface_->pull_params(result.success, args.request);
+    result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "WorkerService.stop");
+      this->eventHandler_->handlerError(ctx, "ParamService.pull_params");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("stop", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("pull_params", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -923,77 +835,24 @@ void WorkerServiceProcessor::process_stop(int32_t seqid, ::apache::thrift::proto
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "WorkerService.stop");
+    this->eventHandler_->preWrite(ctx, "ParamService.pull_params");
   }
 
-  oprot->writeMessageBegin("stop", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("pull_params", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "WorkerService.stop", bytes);
+    this->eventHandler_->postWrite(ctx, "ParamService.pull_params", bytes);
   }
 }
 
-void WorkerServiceProcessor::process_reassign(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
-  if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("WorkerService.reassign", callContext);
-  }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "WorkerService.reassign");
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "WorkerService.reassign");
-  }
-
-  WorkerService_reassign_args args;
-  args.read(iprot);
-  iprot->readMessageEnd();
-  uint32_t bytes = iprot->getTransport()->readEnd();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "WorkerService.reassign", bytes);
-  }
-
-  WorkerService_reassign_result result;
-  try {
-    iface_->reassign(args.request);
-  } catch (const std::exception& e) {
-    if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "WorkerService.reassign");
-    }
-
-    ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("reassign", ::apache::thrift::protocol::T_EXCEPTION, seqid);
-    x.write(oprot);
-    oprot->writeMessageEnd();
-    oprot->getTransport()->writeEnd();
-    oprot->getTransport()->flush();
-    return;
-  }
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "WorkerService.reassign");
-  }
-
-  oprot->writeMessageBegin("reassign", ::apache::thrift::protocol::T_REPLY, seqid);
-  result.write(oprot);
-  oprot->writeMessageEnd();
-  bytes = oprot->getTransport()->writeEnd();
-  oprot->getTransport()->flush();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "WorkerService.reassign", bytes);
-  }
-}
-
-::boost::shared_ptr< ::apache::thrift::TProcessor > WorkerServiceProcessorFactory::getProcessor(const ::apache::thrift::TConnectionInfo& connInfo) {
-  ::apache::thrift::ReleaseHandler< WorkerServiceIfFactory > cleanup(handlerFactory_);
-  ::boost::shared_ptr< WorkerServiceIf > handler(handlerFactory_->getHandler(connInfo), cleanup);
-  ::boost::shared_ptr< ::apache::thrift::TProcessor > processor(new WorkerServiceProcessor(handler));
+::boost::shared_ptr< ::apache::thrift::TProcessor > ParamServiceProcessorFactory::getProcessor(const ::apache::thrift::TConnectionInfo& connInfo) {
+  ::apache::thrift::ReleaseHandler< ParamServiceIfFactory > cleanup(handlerFactory_);
+  ::boost::shared_ptr< ParamServiceIf > handler(handlerFactory_->getHandler(connInfo), cleanup);
+  ::boost::shared_ptr< ::apache::thrift::TProcessor > processor(new ParamServiceProcessor(handler));
   return processor;
 }
 } // namespace
