@@ -4,49 +4,49 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#ifndef Worker_H
-#define Worker_H
+#ifndef WorkerService_H
+#define WorkerService_H
 
 #include <thrift/TDispatchProcessor.h>
 #include "distrust_types.h"
 
 namespace distrust {
 
-class WorkerIf {
+class WorkerServiceIf {
  public:
-  virtual ~WorkerIf() {}
+  virtual ~WorkerServiceIf() {}
   virtual void heartbeat(HBResponse& _return, const HBRequest& request) = 0;
   virtual void start(const StartRequest& request) = 0;
   virtual void stop() = 0;
 };
 
-class WorkerIfFactory {
+class WorkerServiceIfFactory {
  public:
-  typedef WorkerIf Handler;
+  typedef WorkerServiceIf Handler;
 
-  virtual ~WorkerIfFactory() {}
+  virtual ~WorkerServiceIfFactory() {}
 
-  virtual WorkerIf* getHandler(const ::apache::thrift::TConnectionInfo& connInfo) = 0;
-  virtual void releaseHandler(WorkerIf* /* handler */) = 0;
+  virtual WorkerServiceIf* getHandler(const ::apache::thrift::TConnectionInfo& connInfo) = 0;
+  virtual void releaseHandler(WorkerServiceIf* /* handler */) = 0;
 };
 
-class WorkerIfSingletonFactory : virtual public WorkerIfFactory {
+class WorkerServiceIfSingletonFactory : virtual public WorkerServiceIfFactory {
  public:
-  WorkerIfSingletonFactory(const boost::shared_ptr<WorkerIf>& iface) : iface_(iface) {}
-  virtual ~WorkerIfSingletonFactory() {}
+  WorkerServiceIfSingletonFactory(const boost::shared_ptr<WorkerServiceIf>& iface) : iface_(iface) {}
+  virtual ~WorkerServiceIfSingletonFactory() {}
 
-  virtual WorkerIf* getHandler(const ::apache::thrift::TConnectionInfo&) {
+  virtual WorkerServiceIf* getHandler(const ::apache::thrift::TConnectionInfo&) {
     return iface_.get();
   }
-  virtual void releaseHandler(WorkerIf* /* handler */) {}
+  virtual void releaseHandler(WorkerServiceIf* /* handler */) {}
 
  protected:
-  boost::shared_ptr<WorkerIf> iface_;
+  boost::shared_ptr<WorkerServiceIf> iface_;
 };
 
-class WorkerNull : virtual public WorkerIf {
+class WorkerServiceNull : virtual public WorkerServiceIf {
  public:
-  virtual ~WorkerNull() {}
+  virtual ~WorkerServiceNull() {}
   void heartbeat(HBResponse& /* _return */, const HBRequest& /* request */) {
     return;
   }
@@ -58,38 +58,38 @@ class WorkerNull : virtual public WorkerIf {
   }
 };
 
-typedef struct _Worker_heartbeat_args__isset {
-  _Worker_heartbeat_args__isset() : request(false) {}
+typedef struct _WorkerService_heartbeat_args__isset {
+  _WorkerService_heartbeat_args__isset() : request(false) {}
   bool request;
-} _Worker_heartbeat_args__isset;
+} _WorkerService_heartbeat_args__isset;
 
-class Worker_heartbeat_args {
+class WorkerService_heartbeat_args {
  public:
 
-  Worker_heartbeat_args() {
+  WorkerService_heartbeat_args() {
   }
 
-  virtual ~Worker_heartbeat_args() throw() {}
+  virtual ~WorkerService_heartbeat_args() throw() {}
 
   HBRequest request;
 
-  _Worker_heartbeat_args__isset __isset;
+  _WorkerService_heartbeat_args__isset __isset;
 
   void __set_request(const HBRequest& val) {
     request = val;
   }
 
-  bool operator == (const Worker_heartbeat_args & rhs) const
+  bool operator == (const WorkerService_heartbeat_args & rhs) const
   {
     if (!(request == rhs.request))
       return false;
     return true;
   }
-  bool operator != (const Worker_heartbeat_args &rhs) const {
+  bool operator != (const WorkerService_heartbeat_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Worker_heartbeat_args & ) const;
+  bool operator < (const WorkerService_heartbeat_args & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -97,11 +97,11 @@ class Worker_heartbeat_args {
 };
 
 
-class Worker_heartbeat_pargs {
+class WorkerService_heartbeat_pargs {
  public:
 
 
-  virtual ~Worker_heartbeat_pargs() throw() {}
+  virtual ~WorkerService_heartbeat_pargs() throw() {}
 
   const HBRequest* request;
 
@@ -109,95 +109,95 @@ class Worker_heartbeat_pargs {
 
 };
 
-typedef struct _Worker_heartbeat_result__isset {
-  _Worker_heartbeat_result__isset() : success(false) {}
+typedef struct _WorkerService_heartbeat_result__isset {
+  _WorkerService_heartbeat_result__isset() : success(false) {}
   bool success;
-} _Worker_heartbeat_result__isset;
+} _WorkerService_heartbeat_result__isset;
 
-class Worker_heartbeat_result {
+class WorkerService_heartbeat_result {
  public:
 
-  Worker_heartbeat_result() {
+  WorkerService_heartbeat_result() {
   }
 
-  virtual ~Worker_heartbeat_result() throw() {}
+  virtual ~WorkerService_heartbeat_result() throw() {}
 
   HBResponse success;
 
-  _Worker_heartbeat_result__isset __isset;
+  _WorkerService_heartbeat_result__isset __isset;
 
   void __set_success(const HBResponse& val) {
     success = val;
   }
 
-  bool operator == (const Worker_heartbeat_result & rhs) const
+  bool operator == (const WorkerService_heartbeat_result & rhs) const
   {
     if (!(success == rhs.success))
       return false;
     return true;
   }
-  bool operator != (const Worker_heartbeat_result &rhs) const {
+  bool operator != (const WorkerService_heartbeat_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Worker_heartbeat_result & ) const;
+  bool operator < (const WorkerService_heartbeat_result & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-typedef struct _Worker_heartbeat_presult__isset {
-  _Worker_heartbeat_presult__isset() : success(false) {}
+typedef struct _WorkerService_heartbeat_presult__isset {
+  _WorkerService_heartbeat_presult__isset() : success(false) {}
   bool success;
-} _Worker_heartbeat_presult__isset;
+} _WorkerService_heartbeat_presult__isset;
 
-class Worker_heartbeat_presult {
+class WorkerService_heartbeat_presult {
  public:
 
 
-  virtual ~Worker_heartbeat_presult() throw() {}
+  virtual ~WorkerService_heartbeat_presult() throw() {}
 
   HBResponse* success;
 
-  _Worker_heartbeat_presult__isset __isset;
+  _WorkerService_heartbeat_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
 
-typedef struct _Worker_start_args__isset {
-  _Worker_start_args__isset() : request(false) {}
+typedef struct _WorkerService_start_args__isset {
+  _WorkerService_start_args__isset() : request(false) {}
   bool request;
-} _Worker_start_args__isset;
+} _WorkerService_start_args__isset;
 
-class Worker_start_args {
+class WorkerService_start_args {
  public:
 
-  Worker_start_args() {
+  WorkerService_start_args() {
   }
 
-  virtual ~Worker_start_args() throw() {}
+  virtual ~WorkerService_start_args() throw() {}
 
   StartRequest request;
 
-  _Worker_start_args__isset __isset;
+  _WorkerService_start_args__isset __isset;
 
   void __set_request(const StartRequest& val) {
     request = val;
   }
 
-  bool operator == (const Worker_start_args & rhs) const
+  bool operator == (const WorkerService_start_args & rhs) const
   {
     if (!(request == rhs.request))
       return false;
     return true;
   }
-  bool operator != (const Worker_start_args &rhs) const {
+  bool operator != (const WorkerService_start_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Worker_start_args & ) const;
+  bool operator < (const WorkerService_start_args & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -205,11 +205,11 @@ class Worker_start_args {
 };
 
 
-class Worker_start_pargs {
+class WorkerService_start_pargs {
  public:
 
 
-  virtual ~Worker_start_pargs() throw() {}
+  virtual ~WorkerService_start_pargs() throw() {}
 
   const StartRequest* request;
 
@@ -218,24 +218,24 @@ class Worker_start_pargs {
 };
 
 
-class Worker_start_result {
+class WorkerService_start_result {
  public:
 
-  Worker_start_result() {
+  WorkerService_start_result() {
   }
 
-  virtual ~Worker_start_result() throw() {}
+  virtual ~WorkerService_start_result() throw() {}
 
 
-  bool operator == (const Worker_start_result & /* rhs */) const
+  bool operator == (const WorkerService_start_result & /* rhs */) const
   {
     return true;
   }
-  bool operator != (const Worker_start_result &rhs) const {
+  bool operator != (const WorkerService_start_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Worker_start_result & ) const;
+  bool operator < (const WorkerService_start_result & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -243,11 +243,11 @@ class Worker_start_result {
 };
 
 
-class Worker_start_presult {
+class WorkerService_start_presult {
  public:
 
 
-  virtual ~Worker_start_presult() throw() {}
+  virtual ~WorkerService_start_presult() throw() {}
 
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
@@ -255,24 +255,24 @@ class Worker_start_presult {
 };
 
 
-class Worker_stop_args {
+class WorkerService_stop_args {
  public:
 
-  Worker_stop_args() {
+  WorkerService_stop_args() {
   }
 
-  virtual ~Worker_stop_args() throw() {}
+  virtual ~WorkerService_stop_args() throw() {}
 
 
-  bool operator == (const Worker_stop_args & /* rhs */) const
+  bool operator == (const WorkerService_stop_args & /* rhs */) const
   {
     return true;
   }
-  bool operator != (const Worker_stop_args &rhs) const {
+  bool operator != (const WorkerService_stop_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Worker_stop_args & ) const;
+  bool operator < (const WorkerService_stop_args & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -280,11 +280,11 @@ class Worker_stop_args {
 };
 
 
-class Worker_stop_pargs {
+class WorkerService_stop_pargs {
  public:
 
 
-  virtual ~Worker_stop_pargs() throw() {}
+  virtual ~WorkerService_stop_pargs() throw() {}
 
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -292,24 +292,24 @@ class Worker_stop_pargs {
 };
 
 
-class Worker_stop_result {
+class WorkerService_stop_result {
  public:
 
-  Worker_stop_result() {
+  WorkerService_stop_result() {
   }
 
-  virtual ~Worker_stop_result() throw() {}
+  virtual ~WorkerService_stop_result() throw() {}
 
 
-  bool operator == (const Worker_stop_result & /* rhs */) const
+  bool operator == (const WorkerService_stop_result & /* rhs */) const
   {
     return true;
   }
-  bool operator != (const Worker_stop_result &rhs) const {
+  bool operator != (const WorkerService_stop_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Worker_stop_result & ) const;
+  bool operator < (const WorkerService_stop_result & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -317,26 +317,26 @@ class Worker_stop_result {
 };
 
 
-class Worker_stop_presult {
+class WorkerService_stop_presult {
  public:
 
 
-  virtual ~Worker_stop_presult() throw() {}
+  virtual ~WorkerService_stop_presult() throw() {}
 
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
 
-class WorkerClient : virtual public WorkerIf {
+class WorkerServiceClient : virtual public WorkerServiceIf {
  public:
-  WorkerClient(boost::shared_ptr< ::apache::thrift::protocol::TProtocol> prot) :
+  WorkerServiceClient(boost::shared_ptr< ::apache::thrift::protocol::TProtocol> prot) :
     piprot_(prot),
     poprot_(prot) {
     iprot_ = prot.get();
     oprot_ = prot.get();
   }
-  WorkerClient(boost::shared_ptr< ::apache::thrift::protocol::TProtocol> iprot, boost::shared_ptr< ::apache::thrift::protocol::TProtocol> oprot) :
+  WorkerServiceClient(boost::shared_ptr< ::apache::thrift::protocol::TProtocol> iprot, boost::shared_ptr< ::apache::thrift::protocol::TProtocol> oprot) :
     piprot_(iprot),
     poprot_(oprot) {
     iprot_ = iprot.get();
@@ -364,48 +364,48 @@ class WorkerClient : virtual public WorkerIf {
   ::apache::thrift::protocol::TProtocol* oprot_;
 };
 
-class WorkerProcessor : public ::apache::thrift::TDispatchProcessor {
+class WorkerServiceProcessor : public ::apache::thrift::TDispatchProcessor {
  protected:
-  boost::shared_ptr<WorkerIf> iface_;
+  boost::shared_ptr<WorkerServiceIf> iface_;
   virtual bool dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext);
  private:
-  typedef  void (WorkerProcessor::*ProcessFunction)(int32_t, ::apache::thrift::protocol::TProtocol*, ::apache::thrift::protocol::TProtocol*, void*);
+  typedef  void (WorkerServiceProcessor::*ProcessFunction)(int32_t, ::apache::thrift::protocol::TProtocol*, ::apache::thrift::protocol::TProtocol*, void*);
   typedef std::map<std::string, ProcessFunction> ProcessMap;
   ProcessMap processMap_;
   void process_heartbeat(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_start(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_stop(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
  public:
-  WorkerProcessor(boost::shared_ptr<WorkerIf> iface) :
+  WorkerServiceProcessor(boost::shared_ptr<WorkerServiceIf> iface) :
     iface_(iface) {
-    processMap_["heartbeat"] = &WorkerProcessor::process_heartbeat;
-    processMap_["start"] = &WorkerProcessor::process_start;
-    processMap_["stop"] = &WorkerProcessor::process_stop;
+    processMap_["heartbeat"] = &WorkerServiceProcessor::process_heartbeat;
+    processMap_["start"] = &WorkerServiceProcessor::process_start;
+    processMap_["stop"] = &WorkerServiceProcessor::process_stop;
   }
 
-  virtual ~WorkerProcessor() {}
+  virtual ~WorkerServiceProcessor() {}
 };
 
-class WorkerProcessorFactory : public ::apache::thrift::TProcessorFactory {
+class WorkerServiceProcessorFactory : public ::apache::thrift::TProcessorFactory {
  public:
-  WorkerProcessorFactory(const ::boost::shared_ptr< WorkerIfFactory >& handlerFactory) :
+  WorkerServiceProcessorFactory(const ::boost::shared_ptr< WorkerServiceIfFactory >& handlerFactory) :
       handlerFactory_(handlerFactory) {}
 
   ::boost::shared_ptr< ::apache::thrift::TProcessor > getProcessor(const ::apache::thrift::TConnectionInfo& connInfo);
 
  protected:
-  ::boost::shared_ptr< WorkerIfFactory > handlerFactory_;
+  ::boost::shared_ptr< WorkerServiceIfFactory > handlerFactory_;
 };
 
-class WorkerMultiface : virtual public WorkerIf {
+class WorkerServiceMultiface : virtual public WorkerServiceIf {
  public:
-  WorkerMultiface(std::vector<boost::shared_ptr<WorkerIf> >& ifaces) : ifaces_(ifaces) {
+  WorkerServiceMultiface(std::vector<boost::shared_ptr<WorkerServiceIf> >& ifaces) : ifaces_(ifaces) {
   }
-  virtual ~WorkerMultiface() {}
+  virtual ~WorkerServiceMultiface() {}
  protected:
-  std::vector<boost::shared_ptr<WorkerIf> > ifaces_;
-  WorkerMultiface() {}
-  void add(boost::shared_ptr<WorkerIf> iface) {
+  std::vector<boost::shared_ptr<WorkerServiceIf> > ifaces_;
+  WorkerServiceMultiface() {}
+  void add(boost::shared_ptr<WorkerServiceIf> iface) {
     ifaces_.push_back(iface);
   }
  public:

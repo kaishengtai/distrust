@@ -7,8 +7,10 @@ default: all
 
 include worker/Makefile
 
-all: worker/worker worker/workerclient
+all: worker/Worker worker/WorkerClientExample
 
 clean:
 	rm -f worker/*.o
+	rm -f worker/Worker
+	rm -f worker/WorkerClientExample
 	rm -f gen-cpp/*.o

@@ -231,8 +231,8 @@ void swap(HBResponse &a, HBResponse &b) {
   swap(a.__isset, b.__isset);
 }
 
-const char* StartRequest::ascii_fingerprint = "2CFDAD36CCEE166B13D0ED1463C89DF3";
-const uint8_t StartRequest::binary_fingerprint[16] = {0x2C,0xFD,0xAD,0x36,0xCC,0xEE,0x16,0x6B,0x13,0xD0,0xED,0x14,0x63,0xC8,0x9D,0xF3};
+const char* StartRequest::ascii_fingerprint = "C712EF0DA8599E55DF4D0F13415232EF";
+const uint8_t StartRequest::binary_fingerprint[16] = {0xC7,0x12,0xEF,0x0D,0xA8,0x59,0x9E,0x55,0xDF,0x4D,0x0F,0x13,0x41,0x52,0x32,0xEF};
 
 uint32_t StartRequest::read(::apache::thrift::protocol::TProtocol* iprot) {
 
@@ -256,45 +256,13 @@ uint32_t StartRequest::read(::apache::thrift::protocol::TProtocol* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->dataset_path);
-          this->__isset.dataset_path = true;
+          xfer += iprot->readString(this->shard_path);
+          this->__isset.shard_path = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
       case 2:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->label_path);
-          this->__isset.label_path = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 3:
-        if (ftype == ::apache::thrift::protocol::T_I32) {
-          xfer += iprot->readI32(this->input_dim);
-          this->__isset.input_dim = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 4:
-        if (ftype == ::apache::thrift::protocol::T_I32) {
-          xfer += iprot->readI32(this->start_line);
-          this->__isset.start_line = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 5:
-        if (ftype == ::apache::thrift::protocol::T_I32) {
-          xfer += iprot->readI32(this->shard_lines);
-          this->__isset.shard_lines = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 6:
         if (ftype == ::apache::thrift::protocol::T_DOUBLE) {
           xfer += iprot->readDouble(this->learn_rate);
           this->__isset.learn_rate = true;
@@ -318,27 +286,11 @@ uint32_t StartRequest::write(::apache::thrift::protocol::TProtocol* oprot) const
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("StartRequest");
 
-  xfer += oprot->writeFieldBegin("dataset_path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->dataset_path);
+  xfer += oprot->writeFieldBegin("shard_path", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString(this->shard_path);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("label_path", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString(this->label_path);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("input_dim", ::apache::thrift::protocol::T_I32, 3);
-  xfer += oprot->writeI32(this->input_dim);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("start_line", ::apache::thrift::protocol::T_I32, 4);
-  xfer += oprot->writeI32(this->start_line);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("shard_lines", ::apache::thrift::protocol::T_I32, 5);
-  xfer += oprot->writeI32(this->shard_lines);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("learn_rate", ::apache::thrift::protocol::T_DOUBLE, 6);
+  xfer += oprot->writeFieldBegin("learn_rate", ::apache::thrift::protocol::T_DOUBLE, 2);
   xfer += oprot->writeDouble(this->learn_rate);
   xfer += oprot->writeFieldEnd();
 
@@ -349,11 +301,7 @@ uint32_t StartRequest::write(::apache::thrift::protocol::TProtocol* oprot) const
 
 void swap(StartRequest &a, StartRequest &b) {
   using ::std::swap;
-  swap(a.dataset_path, b.dataset_path);
-  swap(a.label_path, b.label_path);
-  swap(a.input_dim, b.input_dim);
-  swap(a.start_line, b.start_line);
-  swap(a.shard_lines, b.shard_lines);
+  swap(a.shard_path, b.shard_path);
   swap(a.learn_rate, b.learn_rate);
   swap(a.__isset, b.__isset);
 }

@@ -1,6 +1,7 @@
 #include <iostream>
+#include <getopt.h>
 
-#include "../gen-cpp/Worker.h"
+#include "Worker.h"
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/transport/TServerSocket.h>
@@ -15,34 +16,78 @@ using boost::shared_ptr;
 
 using namespace distrust;
 
-class WorkerHandler : virtual public WorkerIf {
- public:
-  WorkerHandler() {
-    // Your initialization goes here
+WorkerServiceHandler::WorkerServiceHandler() {
+
+}
+
+WorkerServiceHandler::~WorkerServiceHandler() {
+
+}
+
+void
+WorkerServiceHandler::heartbeat(HBResponse& _return, const HBRequest& request) {
+
+}
+
+void
+WorkerServiceHandler::start(const StartRequest& request) {
+
+}
+
+void
+WorkerServiceHandler::stop() {
+
+}
+
+void
+usage() {
+  std::cerr << "./Worker -i/--masterip <ip> -p/--masterport <port> -w/--workerport <port>" << std::endl;
+}
+
+int
+main(int argc, char **argv) {
+  std::string master_ip = "";
+  int master_port = -1;
+  int worker_port = WORKER_DEFAULT_PORT;
+
+  static struct option long_options[] = {
+    {"masterip",   required_argument, 0, 'i'},
+    {"masterport", required_argument, 0, 'p'},
+    {"workerport", required_argument, 0, 'w'},
+    {0, 0, 0, 0}
+  };
+  int option_index = 0;
+
+  int c;
+  while ((c = getopt_long(argc, argv, "i:p:w:", long_options, &option_index)) != -1) {
+    switch (c) {
+      case 'i':
+        master_ip = optarg;
+        break;
+      case 'p':
+        master_port = atoi(optarg);
+        break;
+      case 'w':
+        worker_port = atoi(optarg);
+        break;
+      default:
+        usage();
+        exit(1);
+    }
   }
 
-  void heartbeat(HBResponse& _return, const HBRequest& request) {
-    // Your implementation goes here
-    printf("heartbeat\n");
+  if (master_ip.empty() || master_port == -1) {
+    usage();
+    exit(1);
   }
 
-  void start(const StartRequest& request) {
-    // Your implementation goes here
-    printf("start\n");
-  }
+  std::cout << "Starting worker on port " << worker_port << std::endl;
+  std::cout << "Master IP: " << master_ip << std::endl;
+  std::cout << "Master port: " << master_port << std::endl;
 
-  void stop() {
-    // Your implementation goes here
-    printf("stop\n");
-  }
-
-};
-
-int main(int argc, char **argv) {
-  int port = 9090;
-  shared_ptr<WorkerHandler> handler(new WorkerHandler());
-  shared_ptr<TProcessor> processor(new WorkerProcessor(handler));
-  shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
+  shared_ptr<WorkerServiceHandler> handler(new WorkerServiceHandler());
+  shared_ptr<TProcessor> processor(new WorkerServiceProcessor(handler));
+  shared_ptr<TServerTransport> serverTransport(new TServerSocket(worker_port));
   shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
   shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
 

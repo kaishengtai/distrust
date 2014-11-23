@@ -16,19 +16,21 @@ struct HBResponse {
     1: optional i32 worker_id,
 }
 
+/**
+ * Request to the worker to start computation.
+ */
 struct StartRequest {
-    1: string dataset_path,
-    2: string label_path,
-    3: i32 input_dim,
-    4: i32 start_line,
-    5: i32 shard_lines,
-    6: double learn_rate,
+    // Path to the dataset shard file on disk
+    1: string shard_path,
+
+    // Initial learning rate
+    2: double learn_rate
 }
 
 /**
  * A worker node that computes on one data shard.
  */
-service Worker {
+service WorkerService {
     HBResponse heartbeat(1:HBRequest request),
     void start(1:StartRequest request),
     void stop(),

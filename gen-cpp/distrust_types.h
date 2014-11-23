@@ -161,53 +161,29 @@ class HBResponse {
 void swap(HBResponse &a, HBResponse &b);
 
 typedef struct _StartRequest__isset {
-  _StartRequest__isset() : dataset_path(false), label_path(false), input_dim(false), start_line(false), shard_lines(false), learn_rate(false) {}
-  bool dataset_path;
-  bool label_path;
-  bool input_dim;
-  bool start_line;
-  bool shard_lines;
+  _StartRequest__isset() : shard_path(false), learn_rate(false) {}
+  bool shard_path;
   bool learn_rate;
 } _StartRequest__isset;
 
 class StartRequest {
  public:
 
-  static const char* ascii_fingerprint; // = "2CFDAD36CCEE166B13D0ED1463C89DF3";
-  static const uint8_t binary_fingerprint[16]; // = {0x2C,0xFD,0xAD,0x36,0xCC,0xEE,0x16,0x6B,0x13,0xD0,0xED,0x14,0x63,0xC8,0x9D,0xF3};
+  static const char* ascii_fingerprint; // = "C712EF0DA8599E55DF4D0F13415232EF";
+  static const uint8_t binary_fingerprint[16]; // = {0xC7,0x12,0xEF,0x0D,0xA8,0x59,0x9E,0x55,0xDF,0x4D,0x0F,0x13,0x41,0x52,0x32,0xEF};
 
-  StartRequest() : dataset_path(), label_path(), input_dim(0), start_line(0), shard_lines(0), learn_rate(0) {
+  StartRequest() : shard_path(), learn_rate(0) {
   }
 
   virtual ~StartRequest() throw() {}
 
-  std::string dataset_path;
-  std::string label_path;
-  int32_t input_dim;
-  int32_t start_line;
-  int32_t shard_lines;
+  std::string shard_path;
   double learn_rate;
 
   _StartRequest__isset __isset;
 
-  void __set_dataset_path(const std::string& val) {
-    dataset_path = val;
-  }
-
-  void __set_label_path(const std::string& val) {
-    label_path = val;
-  }
-
-  void __set_input_dim(const int32_t val) {
-    input_dim = val;
-  }
-
-  void __set_start_line(const int32_t val) {
-    start_line = val;
-  }
-
-  void __set_shard_lines(const int32_t val) {
-    shard_lines = val;
+  void __set_shard_path(const std::string& val) {
+    shard_path = val;
   }
 
   void __set_learn_rate(const double val) {
@@ -216,15 +192,7 @@ class StartRequest {
 
   bool operator == (const StartRequest & rhs) const
   {
-    if (!(dataset_path == rhs.dataset_path))
-      return false;
-    if (!(label_path == rhs.label_path))
-      return false;
-    if (!(input_dim == rhs.input_dim))
-      return false;
-    if (!(start_line == rhs.start_line))
-      return false;
-    if (!(shard_lines == rhs.shard_lines))
+    if (!(shard_path == rhs.shard_path))
       return false;
     if (!(learn_rate == rhs.learn_rate))
       return false;
