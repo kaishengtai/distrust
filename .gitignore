@@ -1,5 +1,6 @@
 *.o
 *~
 #~#
-worker
-workerclient
+Worker
+WorkerClientExample
+Server
