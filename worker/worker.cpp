@@ -2,6 +2,7 @@
 #include <getopt.h>
 
 #include "Worker.h"
+#include <transport/TSocket.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/transport/TServerSocket.h>
@@ -19,16 +20,26 @@ using namespace distrust;
 WorkerServiceHandler::WorkerServiceHandler(
     const std::string& master_ip,
     int master_port) :
-  _master_ip(master_ip),
-  _master_port(master_port)  {
+  master_ip_(master_ip),
+  master_port_(master_port) {
 
-  
+  shared_ptr<TSocket> socket(new TSocket(master_ip.data(), master_port));
+  shared_ptr<TTransport> transport(new TBufferedTransport(socket));
+  shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+  param_client_ = std::unique_ptr<ParamServiceClient>(new ParamServiceClient(protocol));
 
+  while (true) {
+    try {
+      transport->open();
+      break;
+    } catch (const TException &tx) {
+      std::cerr << "Transport error: " << tx.what() << std::endl;
+    }
+    sleep(1);
+  }
 }
 
-WorkerServiceHandler::~WorkerServiceHandler() {
-
-}
+WorkerServiceHandler::~WorkerServiceHandler() { }
 
 void
 WorkerServiceHandler::heartbeat(
@@ -67,6 +78,7 @@ main(int argc, char **argv) {
     {"masterip",   required_argument, 0, 'i'},
     {"masterport", required_argument, 0, 'p'},
     {"workerport", required_argument, 0, 'w'},
+    {"help", no_argument, 0, 'h'},
     {0, 0, 0, 0}
   };
   int option_index = 0;
@@ -83,6 +95,9 @@ main(int argc, char **argv) {
       case 'w':
         worker_port = atoi(optarg);
         break;
+      case 'h':
+        usage();
+        exit(0);
       default:
         usage();
         exit(1);
