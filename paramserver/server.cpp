@@ -65,6 +65,7 @@ class OptionParser {
           break;
         case 'p':
           port = atoi(optarg);
+          break;
         case 'h':
           usage();
           exit(0);

@@ -35,3 +35,4 @@ all: worker/all paramserver/all
 
 clean: worker/clean paramserver/clean
 	rm -f gen-cpp/*.o
+	rm -rf bin
