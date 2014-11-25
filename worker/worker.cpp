@@ -45,25 +45,23 @@ WorkerServiceHandler::WorkerServiceHandler(
 WorkerServiceHandler::~WorkerServiceHandler() { }
 
 void
-WorkerServiceHandler::heartbeat(
-  HBResponse& _return,
-  const HBRequest& request) {
-
+WorkerServiceHandler::heartbeat(HBResponse& _return) {
+  printf("heartbeat\n");
 }
 
 void
 WorkerServiceHandler::start(const StartRequest& request) {
-
+  printf("start\n");
 }
 
 void
 WorkerServiceHandler::stop() {
-
+  printf("stop\n");
 }
 
 void
-WorkerServiceHandler::reassign(const ReassignRequest& request) {
-
+WorkerServiceHandler::reassign(const std::vector<std::string> & shard_paths) {
+  printf("reassign\n");
 }
 
 void

@@ -13,10 +13,10 @@ public:
   WorkerServiceHandler(const std::string& master_ip, int master_port);
   ~WorkerServiceHandler();
 
-  void heartbeat(HBResponse& _return, const HBRequest& request);
+  void heartbeat(HBResponse& _return);
   void start(const StartRequest& request);
   void stop();
-  void reassign(const ReassignRequest& request);
+  void reassign(const std::vector<std::string> & shard_paths);
 
 private:
 
