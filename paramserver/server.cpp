@@ -1,6 +1,7 @@
 #include "distrust/gen-cpp/ParamService.h"
 #include "logcabin/Client/Client.h"
 #include <getopt.h>
+#include <transport/TSocket.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/transport/TServerSocket.h>
@@ -38,6 +39,26 @@ class ParamServiceHandler : virtual public ParamServiceIf {
 
  private:
   Cluster cluster_;
+};
+
+class ParamServiceHandlerFactory : virtual public ParamServiceIfFactory {
+ public:
+  ParamServiceHandlerFactory(const std::string& cluster): cluster_(cluster) { }
+  ParamServiceHandler* getHandler(const TConnectionInfo& connInfo) {
+    std::cout << "Get handler" << std::endl;
+    shared_ptr<TSocket> socket = boost::dynamic_pointer_cast<TSocket>(connInfo.transport);
+    std::cout << "ip: " << socket->getPeerAddress() << std::endl;
+    std::cout << "port: " << socket->getPeerPort() << std::endl;
+    return new ParamServiceHandler(cluster_);
+  }
+
+  void releaseHandler(ParamServiceIf* handler) {
+    std::cout << "Handler released" << std::endl;
+    delete handler;
+  }
+
+ protected:
+  std::string cluster_;
 };
 
 /**
@@ -108,15 +129,15 @@ int main(int argc, char **argv) {
   tree.removeDirectoryEx("/etc");
 
   OptionParser options(argc, argv);
-  shared_ptr<ParamServiceHandler> handler(
-      new ParamServiceHandler(options.cluster));
-  shared_ptr<TProcessor> processor(new ParamServiceProcessor(handler));
+  shared_ptr<ParamServiceHandlerFactory> handlerFactory(
+      new ParamServiceHandlerFactory(options.cluster));
+  shared_ptr<TProcessorFactory> processorFactory(new ParamServiceProcessorFactory(handlerFactory));
   shared_ptr<TServerTransport> serverTransport(new TServerSocket(options.port));
   shared_ptr<TTransportFactory> transportFactory(
     new TBufferedTransportFactory());
   shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
 
-  TSimpleServer server(processor, serverTransport, transportFactory,
+  TSimpleServer server(processorFactory, serverTransport, transportFactory,
                        protocolFactory);
   printf("paramserver: using LogCabin cluster: %s\n", options.cluster.c_str());
   printf("paramserver: start serving on port %d\n", options.port);

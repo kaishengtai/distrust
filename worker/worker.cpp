@@ -26,7 +26,8 @@ WorkerServiceHandler::WorkerServiceHandler(
   shared_ptr<TSocket> socket(new TSocket(master_ip.data(), master_port));
   shared_ptr<TTransport> transport(new TBufferedTransport(socket));
   shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
-  param_client_ = std::unique_ptr<ParamServiceClient>(new ParamServiceClient(protocol));
+  param_client_ = std::unique_ptr<ParamServiceClient>(
+    new ParamServiceClient(protocol));
 
   while (true) {
     try {
@@ -37,6 +38,8 @@ WorkerServiceHandler::WorkerServiceHandler(
     }
     sleep(1);
   }
+
+  std::cout << "Connected to param server at " << master_ip << ":" << master_port << std::endl;
 }
 
 WorkerServiceHandler::~WorkerServiceHandler() { }
@@ -110,8 +113,6 @@ main(int argc, char **argv) {
   }
 
   std::cout << "Starting worker on port " << worker_port << std::endl;
-  std::cout << "Master IP: " << master_ip << std::endl;
-  std::cout << "Master port: " << master_port << std::endl;
 
   shared_ptr<WorkerServiceHandler> handler(new WorkerServiceHandler(master_ip, master_port));
   shared_ptr<TProcessor> processor(new WorkerServiceProcessor(handler));
