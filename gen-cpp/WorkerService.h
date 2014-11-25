@@ -15,10 +15,10 @@ namespace distrust {
 class WorkerServiceIf {
  public:
   virtual ~WorkerServiceIf() {}
-  virtual void heartbeat(HBResponse& _return, const HBRequest& request) = 0;
+  virtual void heartbeat(HBResponse& _return) = 0;
   virtual void start(const StartRequest& request) = 0;
   virtual void stop() = 0;
-  virtual void reassign(const ReassignRequest& request) = 0;
+  virtual void reassign(const std::vector<std::string> & shard_paths) = 0;
 };
 
 class WorkerServiceIfFactory {
@@ -48,7 +48,7 @@ class WorkerServiceIfSingletonFactory : virtual public WorkerServiceIfFactory {
 class WorkerServiceNull : virtual public WorkerServiceIf {
  public:
   virtual ~WorkerServiceNull() {}
-  void heartbeat(HBResponse& /* _return */, const HBRequest& /* request */) {
+  void heartbeat(HBResponse& /* _return */) {
     return;
   }
   void start(const StartRequest& /* request */) {
@@ -57,15 +57,11 @@ class WorkerServiceNull : virtual public WorkerServiceIf {
   void stop() {
     return;
   }
-  void reassign(const ReassignRequest& /* request */) {
+  void reassign(const std::vector<std::string> & /* shard_paths */) {
     return;
   }
 };
 
-typedef struct _WorkerService_heartbeat_args__isset {
-  _WorkerService_heartbeat_args__isset() : request(false) {}
-  bool request;
-} _WorkerService_heartbeat_args__isset;
 
 class WorkerService_heartbeat_args {
  public:
@@ -75,18 +71,9 @@ class WorkerService_heartbeat_args {
 
   virtual ~WorkerService_heartbeat_args() throw() {}
 
-  HBRequest request;
 
-  _WorkerService_heartbeat_args__isset __isset;
-
-  void __set_request(const HBRequest& val) {
-    request = val;
-  }
-
-  bool operator == (const WorkerService_heartbeat_args & rhs) const
+  bool operator == (const WorkerService_heartbeat_args & /* rhs */) const
   {
-    if (!(request == rhs.request))
-      return false;
     return true;
   }
   bool operator != (const WorkerService_heartbeat_args &rhs) const {
@@ -107,7 +94,6 @@ class WorkerService_heartbeat_pargs {
 
   virtual ~WorkerService_heartbeat_pargs() throw() {}
 
-  const HBRequest* request;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
@@ -333,8 +319,8 @@ class WorkerService_stop_presult {
 };
 
 typedef struct _WorkerService_reassign_args__isset {
-  _WorkerService_reassign_args__isset() : request(false) {}
-  bool request;
+  _WorkerService_reassign_args__isset() : shard_paths(false) {}
+  bool shard_paths;
 } _WorkerService_reassign_args__isset;
 
 class WorkerService_reassign_args {
@@ -345,17 +331,17 @@ class WorkerService_reassign_args {
 
   virtual ~WorkerService_reassign_args() throw() {}
 
-  ReassignRequest request;
+  std::vector<std::string>  shard_paths;
 
   _WorkerService_reassign_args__isset __isset;
 
-  void __set_request(const ReassignRequest& val) {
-    request = val;
+  void __set_shard_paths(const std::vector<std::string> & val) {
+    shard_paths = val;
   }
 
   bool operator == (const WorkerService_reassign_args & rhs) const
   {
-    if (!(request == rhs.request))
+    if (!(shard_paths == rhs.shard_paths))
       return false;
     return true;
   }
@@ -377,7 +363,7 @@ class WorkerService_reassign_pargs {
 
   virtual ~WorkerService_reassign_pargs() throw() {}
 
-  const ReassignRequest* request;
+  const std::vector<std::string> * shard_paths;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
@@ -440,8 +426,8 @@ class WorkerServiceClient : virtual public WorkerServiceIf {
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
-  void heartbeat(HBResponse& _return, const HBRequest& request);
-  void send_heartbeat(const HBRequest& request);
+  void heartbeat(HBResponse& _return);
+  void send_heartbeat();
   void recv_heartbeat(HBResponse& _return);
   void start(const StartRequest& request);
   void send_start(const StartRequest& request);
@@ -449,8 +435,8 @@ class WorkerServiceClient : virtual public WorkerServiceIf {
   void stop();
   void send_stop();
   void recv_stop();
-  void reassign(const ReassignRequest& request);
-  void send_reassign(const ReassignRequest& request);
+  void reassign(const std::vector<std::string> & shard_paths);
+  void send_reassign(const std::vector<std::string> & shard_paths);
   void recv_reassign();
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
@@ -506,13 +492,13 @@ class WorkerServiceMultiface : virtual public WorkerServiceIf {
     ifaces_.push_back(iface);
   }
  public:
-  void heartbeat(HBResponse& _return, const HBRequest& request) {
+  void heartbeat(HBResponse& _return) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->heartbeat(_return, request);
+      ifaces_[i]->heartbeat(_return);
     }
-    ifaces_[i]->heartbeat(_return, request);
+    ifaces_[i]->heartbeat(_return);
     return;
   }
 
@@ -534,13 +520,13 @@ class WorkerServiceMultiface : virtual public WorkerServiceIf {
     ifaces_[i]->stop();
   }
 
-  void reassign(const ReassignRequest& request) {
+  void reassign(const std::vector<std::string> & shard_paths) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->reassign(request);
+      ifaces_[i]->reassign(shard_paths);
     }
-    ifaces_[i]->reassign(request);
+    ifaces_[i]->reassign(shard_paths);
   }
 
 };

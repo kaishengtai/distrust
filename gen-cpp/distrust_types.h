@@ -175,114 +175,19 @@ class Params {
 
 void swap(Params &a, Params &b);
 
-typedef struct _ServerInfo__isset {
-  _ServerInfo__isset() : ip(false), port(false) {}
-  bool ip;
-  bool port;
-} _ServerInfo__isset;
-
-class ServerInfo {
- public:
-
-  static const char* ascii_fingerprint; // = "EEBC915CE44901401D881E6091423036";
-  static const uint8_t binary_fingerprint[16]; // = {0xEE,0xBC,0x91,0x5C,0xE4,0x49,0x01,0x40,0x1D,0x88,0x1E,0x60,0x91,0x42,0x30,0x36};
-
-  ServerInfo() : ip(), port(0) {
-  }
-
-  virtual ~ServerInfo() throw() {}
-
-  std::string ip;
-  int32_t port;
-
-  _ServerInfo__isset __isset;
-
-  void __set_ip(const std::string& val) {
-    ip = val;
-  }
-
-  void __set_port(const int32_t val) {
-    port = val;
-  }
-
-  bool operator == (const ServerInfo & rhs) const
-  {
-    if (!(ip == rhs.ip))
-      return false;
-    if (!(port == rhs.port))
-      return false;
-    return true;
-  }
-  bool operator != (const ServerInfo &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const ServerInfo & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-void swap(ServerInfo &a, ServerInfo &b);
-
-typedef struct _AnnounceRequest__isset {
-  _AnnounceRequest__isset() : worker_info(false) {}
-  bool worker_info;
-} _AnnounceRequest__isset;
-
-class AnnounceRequest {
- public:
-
-  static const char* ascii_fingerprint; // = "2BD9E1CC52BCB0899198EEADB3593B00";
-  static const uint8_t binary_fingerprint[16]; // = {0x2B,0xD9,0xE1,0xCC,0x52,0xBC,0xB0,0x89,0x91,0x98,0xEE,0xAD,0xB3,0x59,0x3B,0x00};
-
-  AnnounceRequest() {
-  }
-
-  virtual ~AnnounceRequest() throw() {}
-
-  ServerInfo worker_info;
-
-  _AnnounceRequest__isset __isset;
-
-  void __set_worker_info(const ServerInfo& val) {
-    worker_info = val;
-  }
-
-  bool operator == (const AnnounceRequest & rhs) const
-  {
-    if (!(worker_info == rhs.worker_info))
-      return false;
-    return true;
-  }
-  bool operator != (const AnnounceRequest &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const AnnounceRequest & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-void swap(AnnounceRequest &a, AnnounceRequest &b);
-
 typedef struct _AnnounceResponse__isset {
-  _AnnounceResponse__isset() : model_info(false), params(false), shard_paths(false), learn_rate(false), param_servers(false) {}
+  _AnnounceResponse__isset() : model_info(false), params(false), shard_paths(false), learn_rate(false) {}
   bool model_info;
   bool params;
   bool shard_paths;
   bool learn_rate;
-  bool param_servers;
 } _AnnounceResponse__isset;
 
 class AnnounceResponse {
  public:
 
-  static const char* ascii_fingerprint; // = "AFBEB144070F2944B0ABB54DD68305D0";
-  static const uint8_t binary_fingerprint[16]; // = {0xAF,0xBE,0xB1,0x44,0x07,0x0F,0x29,0x44,0xB0,0xAB,0xB5,0x4D,0xD6,0x83,0x05,0xD0};
+  static const char* ascii_fingerprint; // = "30873D235B4A3B68B67FF6A2E6BDE934";
+  static const uint8_t binary_fingerprint[16]; // = {0x30,0x87,0x3D,0x23,0x5B,0x4A,0x3B,0x68,0xB6,0x7F,0xF6,0xA2,0xE6,0xBD,0xE9,0x34};
 
   AnnounceResponse() : learn_rate(0) {
   }
@@ -293,7 +198,6 @@ class AnnounceResponse {
   Params params;
   std::vector<std::string>  shard_paths;
   double learn_rate;
-  std::vector<ServerInfo>  param_servers;
 
   _AnnounceResponse__isset __isset;
 
@@ -313,10 +217,6 @@ class AnnounceResponse {
     learn_rate = val;
   }
 
-  void __set_param_servers(const std::vector<ServerInfo> & val) {
-    param_servers = val;
-  }
-
   bool operator == (const AnnounceResponse & rhs) const
   {
     if (!(model_info == rhs.model_info))
@@ -326,8 +226,6 @@ class AnnounceResponse {
     if (!(shard_paths == rhs.shard_paths))
       return false;
     if (!(learn_rate == rhs.learn_rate))
-      return false;
-    if (!(param_servers == rhs.param_servers))
       return false;
     return true;
   }
@@ -344,282 +242,33 @@ class AnnounceResponse {
 
 void swap(AnnounceResponse &a, AnnounceResponse &b);
 
-typedef struct _UpdateRequest__isset {
-  _UpdateRequest__isset() : update(false), worker_info(false) {}
-  bool update;
-  bool worker_info;
-} _UpdateRequest__isset;
-
-class UpdateRequest {
- public:
-
-  static const char* ascii_fingerprint; // = "5252BFD9FD3B10A47FE26840939EECE6";
-  static const uint8_t binary_fingerprint[16]; // = {0x52,0x52,0xBF,0xD9,0xFD,0x3B,0x10,0xA4,0x7F,0xE2,0x68,0x40,0x93,0x9E,0xEC,0xE6};
-
-  UpdateRequest() {
-  }
-
-  virtual ~UpdateRequest() throw() {}
-
-  Params update;
-  ServerInfo worker_info;
-
-  _UpdateRequest__isset __isset;
-
-  void __set_update(const Params& val) {
-    update = val;
-  }
-
-  void __set_worker_info(const ServerInfo& val) {
-    worker_info = val;
-    __isset.worker_info = true;
-  }
-
-  bool operator == (const UpdateRequest & rhs) const
-  {
-    if (!(update == rhs.update))
-      return false;
-    if (__isset.worker_info != rhs.__isset.worker_info)
-      return false;
-    else if (__isset.worker_info && !(worker_info == rhs.worker_info))
-      return false;
-    return true;
-  }
-  bool operator != (const UpdateRequest &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const UpdateRequest & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-void swap(UpdateRequest &a, UpdateRequest &b);
-
-typedef struct _UpdateResponse__isset {
-  _UpdateResponse__isset() : param_servers(false) {}
-  bool param_servers;
-} _UpdateResponse__isset;
-
-class UpdateResponse {
- public:
-
-  static const char* ascii_fingerprint; // = "E3BAB2DD3B420D9247DE4278A71DC1B0";
-  static const uint8_t binary_fingerprint[16]; // = {0xE3,0xBA,0xB2,0xDD,0x3B,0x42,0x0D,0x92,0x47,0xDE,0x42,0x78,0xA7,0x1D,0xC1,0xB0};
-
-  UpdateResponse() {
-  }
-
-  virtual ~UpdateResponse() throw() {}
-
-  std::vector<ServerInfo>  param_servers;
-
-  _UpdateResponse__isset __isset;
-
-  void __set_param_servers(const std::vector<ServerInfo> & val) {
-    param_servers = val;
-    __isset.param_servers = true;
-  }
-
-  bool operator == (const UpdateResponse & rhs) const
-  {
-    if (__isset.param_servers != rhs.__isset.param_servers)
-      return false;
-    else if (__isset.param_servers && !(param_servers == rhs.param_servers))
-      return false;
-    return true;
-  }
-  bool operator != (const UpdateResponse &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const UpdateResponse & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-void swap(UpdateResponse &a, UpdateResponse &b);
-
-typedef struct _PullRequest__isset {
-  _PullRequest__isset() : worker_info(false) {}
-  bool worker_info;
-} _PullRequest__isset;
-
-class PullRequest {
- public:
-
-  static const char* ascii_fingerprint; // = "45F07C5FAF8C5003DA143A45C267ADFE";
-  static const uint8_t binary_fingerprint[16]; // = {0x45,0xF0,0x7C,0x5F,0xAF,0x8C,0x50,0x03,0xDA,0x14,0x3A,0x45,0xC2,0x67,0xAD,0xFE};
-
-  PullRequest() {
-  }
-
-  virtual ~PullRequest() throw() {}
-
-  ServerInfo worker_info;
-
-  _PullRequest__isset __isset;
-
-  void __set_worker_info(const ServerInfo& val) {
-    worker_info = val;
-    __isset.worker_info = true;
-  }
-
-  bool operator == (const PullRequest & rhs) const
-  {
-    if (__isset.worker_info != rhs.__isset.worker_info)
-      return false;
-    else if (__isset.worker_info && !(worker_info == rhs.worker_info))
-      return false;
-    return true;
-  }
-  bool operator != (const PullRequest &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const PullRequest & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-void swap(PullRequest &a, PullRequest &b);
-
-typedef struct _PullResponse__isset {
-  _PullResponse__isset() : params(false), param_servers(false) {}
-  bool params;
-  bool param_servers;
-} _PullResponse__isset;
-
-class PullResponse {
- public:
-
-  static const char* ascii_fingerprint; // = "76FE0E92C52E0EC69A75E4CF3AE83DEF";
-  static const uint8_t binary_fingerprint[16]; // = {0x76,0xFE,0x0E,0x92,0xC5,0x2E,0x0E,0xC6,0x9A,0x75,0xE4,0xCF,0x3A,0xE8,0x3D,0xEF};
-
-  PullResponse() {
-  }
-
-  virtual ~PullResponse() throw() {}
-
-  Params params;
-  std::vector<ServerInfo>  param_servers;
-
-  _PullResponse__isset __isset;
-
-  void __set_params(const Params& val) {
-    params = val;
-  }
-
-  void __set_param_servers(const std::vector<ServerInfo> & val) {
-    param_servers = val;
-    __isset.param_servers = true;
-  }
-
-  bool operator == (const PullResponse & rhs) const
-  {
-    if (!(params == rhs.params))
-      return false;
-    if (__isset.param_servers != rhs.__isset.param_servers)
-      return false;
-    else if (__isset.param_servers && !(param_servers == rhs.param_servers))
-      return false;
-    return true;
-  }
-  bool operator != (const PullResponse &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const PullResponse & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-void swap(PullResponse &a, PullResponse &b);
-
-typedef struct _HBRequest__isset {
-  _HBRequest__isset() : master_info(false) {}
-  bool master_info;
-} _HBRequest__isset;
-
-class HBRequest {
- public:
-
-  static const char* ascii_fingerprint; // = "45F07C5FAF8C5003DA143A45C267ADFE";
-  static const uint8_t binary_fingerprint[16]; // = {0x45,0xF0,0x7C,0x5F,0xAF,0x8C,0x50,0x03,0xDA,0x14,0x3A,0x45,0xC2,0x67,0xAD,0xFE};
-
-  HBRequest() {
-  }
-
-  virtual ~HBRequest() throw() {}
-
-  ServerInfo master_info;
-
-  _HBRequest__isset __isset;
-
-  void __set_master_info(const ServerInfo& val) {
-    master_info = val;
-    __isset.master_info = true;
-  }
-
-  bool operator == (const HBRequest & rhs) const
-  {
-    if (__isset.master_info != rhs.__isset.master_info)
-      return false;
-    else if (__isset.master_info && !(master_info == rhs.master_info))
-      return false;
-    return true;
-  }
-  bool operator != (const HBRequest &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const HBRequest & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-void swap(HBRequest &a, HBRequest &b);
-
 typedef struct _HBResponse__isset {
-  _HBResponse__isset() : worker_info(false) {}
-  bool worker_info;
+  _HBResponse__isset() : completed_shards(false) {}
+  bool completed_shards;
 } _HBResponse__isset;
 
 class HBResponse {
  public:
 
-  static const char* ascii_fingerprint; // = "45F07C5FAF8C5003DA143A45C267ADFE";
-  static const uint8_t binary_fingerprint[16]; // = {0x45,0xF0,0x7C,0x5F,0xAF,0x8C,0x50,0x03,0xDA,0x14,0x3A,0x45,0xC2,0x67,0xAD,0xFE};
+  static const char* ascii_fingerprint; // = "ACE4F644F0FDD289DDC4EE5B83BC13C0";
+  static const uint8_t binary_fingerprint[16]; // = {0xAC,0xE4,0xF6,0x44,0xF0,0xFD,0xD2,0x89,0xDD,0xC4,0xEE,0x5B,0x83,0xBC,0x13,0xC0};
 
   HBResponse() {
   }
 
   virtual ~HBResponse() throw() {}
 
-  ServerInfo worker_info;
+  std::vector<std::string>  completed_shards;
 
   _HBResponse__isset __isset;
 
-  void __set_worker_info(const ServerInfo& val) {
-    worker_info = val;
-    __isset.worker_info = true;
+  void __set_completed_shards(const std::vector<std::string> & val) {
+    completed_shards = val;
   }
 
   bool operator == (const HBResponse & rhs) const
   {
-    if (__isset.worker_info != rhs.__isset.worker_info)
-      return false;
-    else if (__isset.worker_info && !(worker_info == rhs.worker_info))
+    if (!(completed_shards == rhs.completed_shards))
       return false;
     return true;
   }
@@ -686,49 +335,6 @@ class StartRequest {
 };
 
 void swap(StartRequest &a, StartRequest &b);
-
-typedef struct _ReassignRequest__isset {
-  _ReassignRequest__isset() : shard_paths(false) {}
-  bool shard_paths;
-} _ReassignRequest__isset;
-
-class ReassignRequest {
- public:
-
-  static const char* ascii_fingerprint; // = "ACE4F644F0FDD289DDC4EE5B83BC13C0";
-  static const uint8_t binary_fingerprint[16]; // = {0xAC,0xE4,0xF6,0x44,0xF0,0xFD,0xD2,0x89,0xDD,0xC4,0xEE,0x5B,0x83,0xBC,0x13,0xC0};
-
-  ReassignRequest() {
-  }
-
-  virtual ~ReassignRequest() throw() {}
-
-  std::vector<std::string>  shard_paths;
-
-  _ReassignRequest__isset __isset;
-
-  void __set_shard_paths(const std::vector<std::string> & val) {
-    shard_paths = val;
-  }
-
-  bool operator == (const ReassignRequest & rhs) const
-  {
-    if (!(shard_paths == rhs.shard_paths))
-      return false;
-    return true;
-  }
-  bool operator != (const ReassignRequest &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const ReassignRequest & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-void swap(ReassignRequest &a, ReassignRequest &b);
 
 } // namespace
 

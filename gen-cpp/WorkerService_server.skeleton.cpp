@@ -22,7 +22,7 @@ class WorkerServiceHandler : virtual public WorkerServiceIf {
     // Your initialization goes here
   }
 
-  void heartbeat(HBResponse& _return, const HBRequest& request) {
+  void heartbeat(HBResponse& _return) {
     // Your implementation goes here
     printf("heartbeat\n");
   }
@@ -37,7 +37,7 @@ class WorkerServiceHandler : virtual public WorkerServiceIf {
     printf("stop\n");
   }
 
-  void reassign(const ReassignRequest& request) {
+  void reassign(const std::vector<std::string> & shard_paths) {
     // Your implementation goes here
     printf("reassign\n");
   }

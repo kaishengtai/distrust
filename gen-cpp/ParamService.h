@@ -15,9 +15,9 @@ namespace distrust {
 class ParamServiceIf {
  public:
   virtual ~ParamServiceIf() {}
-  virtual void announce(AnnounceResponse& _return, const AnnounceRequest& request) = 0;
-  virtual void push_update(UpdateResponse& _return, const UpdateRequest& request) = 0;
-  virtual void pull_params(PullResponse& _return, const PullRequest& request) = 0;
+  virtual void announce(AnnounceResponse& _return) = 0;
+  virtual void push_update(const Params& params) = 0;
+  virtual void pull_params(Params& _return) = 0;
 };
 
 class ParamServiceIfFactory {
@@ -47,21 +47,17 @@ class ParamServiceIfSingletonFactory : virtual public ParamServiceIfFactory {
 class ParamServiceNull : virtual public ParamServiceIf {
  public:
   virtual ~ParamServiceNull() {}
-  void announce(AnnounceResponse& /* _return */, const AnnounceRequest& /* request */) {
+  void announce(AnnounceResponse& /* _return */) {
     return;
   }
-  void push_update(UpdateResponse& /* _return */, const UpdateRequest& /* request */) {
+  void push_update(const Params& /* params */) {
     return;
   }
-  void pull_params(PullResponse& /* _return */, const PullRequest& /* request */) {
+  void pull_params(Params& /* _return */) {
     return;
   }
 };
 
-typedef struct _ParamService_announce_args__isset {
-  _ParamService_announce_args__isset() : request(false) {}
-  bool request;
-} _ParamService_announce_args__isset;
 
 class ParamService_announce_args {
  public:
@@ -71,18 +67,9 @@ class ParamService_announce_args {
 
   virtual ~ParamService_announce_args() throw() {}
 
-  AnnounceRequest request;
 
-  _ParamService_announce_args__isset __isset;
-
-  void __set_request(const AnnounceRequest& val) {
-    request = val;
-  }
-
-  bool operator == (const ParamService_announce_args & rhs) const
+  bool operator == (const ParamService_announce_args & /* rhs */) const
   {
-    if (!(request == rhs.request))
-      return false;
     return true;
   }
   bool operator != (const ParamService_announce_args &rhs) const {
@@ -103,7 +90,6 @@ class ParamService_announce_pargs {
 
   virtual ~ParamService_announce_pargs() throw() {}
 
-  const AnnounceRequest* request;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
@@ -167,8 +153,8 @@ class ParamService_announce_presult {
 };
 
 typedef struct _ParamService_push_update_args__isset {
-  _ParamService_push_update_args__isset() : request(false) {}
-  bool request;
+  _ParamService_push_update_args__isset() : params(false) {}
+  bool params;
 } _ParamService_push_update_args__isset;
 
 class ParamService_push_update_args {
@@ -179,17 +165,17 @@ class ParamService_push_update_args {
 
   virtual ~ParamService_push_update_args() throw() {}
 
-  UpdateRequest request;
+  Params params;
 
   _ParamService_push_update_args__isset __isset;
 
-  void __set_request(const UpdateRequest& val) {
-    request = val;
+  void __set_params(const Params& val) {
+    params = val;
   }
 
   bool operator == (const ParamService_push_update_args & rhs) const
   {
-    if (!(request == rhs.request))
+    if (!(params == rhs.params))
       return false;
     return true;
   }
@@ -211,16 +197,12 @@ class ParamService_push_update_pargs {
 
   virtual ~ParamService_push_update_pargs() throw() {}
 
-  const UpdateRequest* request;
+  const Params* params;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-typedef struct _ParamService_push_update_result__isset {
-  _ParamService_push_update_result__isset() : success(false) {}
-  bool success;
-} _ParamService_push_update_result__isset;
 
 class ParamService_push_update_result {
  public:
@@ -230,18 +212,9 @@ class ParamService_push_update_result {
 
   virtual ~ParamService_push_update_result() throw() {}
 
-  UpdateResponse success;
 
-  _ParamService_push_update_result__isset __isset;
-
-  void __set_success(const UpdateResponse& val) {
-    success = val;
-  }
-
-  bool operator == (const ParamService_push_update_result & rhs) const
+  bool operator == (const ParamService_push_update_result & /* rhs */) const
   {
-    if (!(success == rhs.success))
-      return false;
     return true;
   }
   bool operator != (const ParamService_push_update_result &rhs) const {
@@ -255,10 +228,6 @@ class ParamService_push_update_result {
 
 };
 
-typedef struct _ParamService_push_update_presult__isset {
-  _ParamService_push_update_presult__isset() : success(false) {}
-  bool success;
-} _ParamService_push_update_presult__isset;
 
 class ParamService_push_update_presult {
  public:
@@ -266,18 +235,11 @@ class ParamService_push_update_presult {
 
   virtual ~ParamService_push_update_presult() throw() {}
 
-  UpdateResponse* success;
-
-  _ParamService_push_update_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
 };
 
-typedef struct _ParamService_pull_params_args__isset {
-  _ParamService_pull_params_args__isset() : request(false) {}
-  bool request;
-} _ParamService_pull_params_args__isset;
 
 class ParamService_pull_params_args {
  public:
@@ -287,18 +249,9 @@ class ParamService_pull_params_args {
 
   virtual ~ParamService_pull_params_args() throw() {}
 
-  PullRequest request;
 
-  _ParamService_pull_params_args__isset __isset;
-
-  void __set_request(const PullRequest& val) {
-    request = val;
-  }
-
-  bool operator == (const ParamService_pull_params_args & rhs) const
+  bool operator == (const ParamService_pull_params_args & /* rhs */) const
   {
-    if (!(request == rhs.request))
-      return false;
     return true;
   }
   bool operator != (const ParamService_pull_params_args &rhs) const {
@@ -319,7 +272,6 @@ class ParamService_pull_params_pargs {
 
   virtual ~ParamService_pull_params_pargs() throw() {}
 
-  const PullRequest* request;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
@@ -338,11 +290,11 @@ class ParamService_pull_params_result {
 
   virtual ~ParamService_pull_params_result() throw() {}
 
-  PullResponse success;
+  Params success;
 
   _ParamService_pull_params_result__isset __isset;
 
-  void __set_success(const PullResponse& val) {
+  void __set_success(const Params& val) {
     success = val;
   }
 
@@ -374,7 +326,7 @@ class ParamService_pull_params_presult {
 
   virtual ~ParamService_pull_params_presult() throw() {}
 
-  PullResponse* success;
+  Params* success;
 
   _ParamService_pull_params_presult__isset __isset;
 
@@ -402,15 +354,15 @@ class ParamServiceClient : virtual public ParamServiceIf {
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
-  void announce(AnnounceResponse& _return, const AnnounceRequest& request);
-  void send_announce(const AnnounceRequest& request);
+  void announce(AnnounceResponse& _return);
+  void send_announce();
   void recv_announce(AnnounceResponse& _return);
-  void push_update(UpdateResponse& _return, const UpdateRequest& request);
-  void send_push_update(const UpdateRequest& request);
-  void recv_push_update(UpdateResponse& _return);
-  void pull_params(PullResponse& _return, const PullRequest& request);
-  void send_pull_params(const PullRequest& request);
-  void recv_pull_params(PullResponse& _return);
+  void push_update(const Params& params);
+  void send_push_update(const Params& params);
+  void recv_push_update();
+  void pull_params(Params& _return);
+  void send_pull_params();
+  void recv_pull_params(Params& _return);
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> poprot_;
@@ -463,33 +415,32 @@ class ParamServiceMultiface : virtual public ParamServiceIf {
     ifaces_.push_back(iface);
   }
  public:
-  void announce(AnnounceResponse& _return, const AnnounceRequest& request) {
+  void announce(AnnounceResponse& _return) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->announce(_return, request);
+      ifaces_[i]->announce(_return);
     }
-    ifaces_[i]->announce(_return, request);
+    ifaces_[i]->announce(_return);
     return;
   }
 
-  void push_update(UpdateResponse& _return, const UpdateRequest& request) {
+  void push_update(const Params& params) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->push_update(_return, request);
+      ifaces_[i]->push_update(params);
     }
-    ifaces_[i]->push_update(_return, request);
-    return;
+    ifaces_[i]->push_update(params);
   }
 
-  void pull_params(PullResponse& _return, const PullRequest& request) {
+  void pull_params(Params& _return) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->pull_params(_return, request);
+      ifaces_[i]->pull_params(_return);
     }
-    ifaces_[i]->pull_params(_return, request);
+    ifaces_[i]->pull_params(_return);
     return;
   }
 

@@ -22,17 +22,17 @@ class ParamServiceHandler : virtual public ParamServiceIf {
     // Your initialization goes here
   }
 
-  void announce(AnnounceResponse& _return, const AnnounceRequest& request) {
+  void announce(AnnounceResponse& _return) {
     // Your implementation goes here
     printf("announce\n");
   }
 
-  void push_update(UpdateResponse& _return, const UpdateRequest& request) {
+  void push_update(const Params& params) {
     // Your implementation goes here
     printf("push_update\n");
   }
 
-  void pull_params(PullResponse& _return, const PullRequest& request) {
+  void pull_params(Params& _return) {
     // Your implementation goes here
     printf("pull_params\n");
   }

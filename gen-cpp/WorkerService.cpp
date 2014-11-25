@@ -26,20 +26,7 @@ uint32_t WorkerService_heartbeat_args::read(::apache::thrift::protocol::TProtoco
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->request.read(iprot);
-          this->__isset.request = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
+    xfer += iprot->skip(ftype);
     xfer += iprot->readFieldEnd();
   }
 
@@ -52,10 +39,6 @@ uint32_t WorkerService_heartbeat_args::write(::apache::thrift::protocol::TProtoc
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("WorkerService_heartbeat_args");
 
-  xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += this->request.write(oprot);
-  xfer += oprot->writeFieldEnd();
-
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -64,10 +47,6 @@ uint32_t WorkerService_heartbeat_args::write(::apache::thrift::protocol::TProtoc
 uint32_t WorkerService_heartbeat_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("WorkerService_heartbeat_pargs");
-
-  xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += (*(this->request)).write(oprot);
-  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -432,9 +411,21 @@ uint32_t WorkerService_reassign_args::read(::apache::thrift::protocol::TProtocol
     switch (fid)
     {
       case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->request.read(iprot);
-          this->__isset.request = true;
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->shard_paths.clear();
+            uint32_t _size48;
+            ::apache::thrift::protocol::TType _etype51;
+            xfer += iprot->readListBegin(_etype51, _size48);
+            this->shard_paths.resize(_size48);
+            uint32_t _i52;
+            for (_i52 = 0; _i52 < _size48; ++_i52)
+            {
+              xfer += iprot->readString(this->shard_paths[_i52]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.shard_paths = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -455,8 +446,16 @@ uint32_t WorkerService_reassign_args::write(::apache::thrift::protocol::TProtoco
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("WorkerService_reassign_args");
 
-  xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += this->request.write(oprot);
+  xfer += oprot->writeFieldBegin("shard_paths", ::apache::thrift::protocol::T_LIST, 1);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->shard_paths.size()));
+    std::vector<std::string> ::const_iterator _iter53;
+    for (_iter53 = this->shard_paths.begin(); _iter53 != this->shard_paths.end(); ++_iter53)
+    {
+      xfer += oprot->writeString((*_iter53));
+    }
+    xfer += oprot->writeListEnd();
+  }
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -468,8 +467,16 @@ uint32_t WorkerService_reassign_pargs::write(::apache::thrift::protocol::TProtoc
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("WorkerService_reassign_pargs");
 
-  xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += (*(this->request)).write(oprot);
+  xfer += oprot->writeFieldBegin("shard_paths", ::apache::thrift::protocol::T_LIST, 1);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->shard_paths)).size()));
+    std::vector<std::string> ::const_iterator _iter54;
+    for (_iter54 = (*(this->shard_paths)).begin(); _iter54 != (*(this->shard_paths)).end(); ++_iter54)
+    {
+      xfer += oprot->writeString((*_iter54));
+    }
+    xfer += oprot->writeListEnd();
+  }
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -542,19 +549,18 @@ uint32_t WorkerService_reassign_presult::read(::apache::thrift::protocol::TProto
   return xfer;
 }
 
-void WorkerServiceClient::heartbeat(HBResponse& _return, const HBRequest& request)
+void WorkerServiceClient::heartbeat(HBResponse& _return)
 {
-  send_heartbeat(request);
+  send_heartbeat();
   recv_heartbeat(_return);
 }
 
-void WorkerServiceClient::send_heartbeat(const HBRequest& request)
+void WorkerServiceClient::send_heartbeat()
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("heartbeat", ::apache::thrift::protocol::T_CALL, cseqid);
 
   WorkerService_heartbeat_pargs args;
-  args.request = &request;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -705,19 +711,19 @@ void WorkerServiceClient::recv_stop()
   return;
 }
 
-void WorkerServiceClient::reassign(const ReassignRequest& request)
+void WorkerServiceClient::reassign(const std::vector<std::string> & shard_paths)
 {
-  send_reassign(request);
+  send_reassign(shard_paths);
   recv_reassign();
 }
 
-void WorkerServiceClient::send_reassign(const ReassignRequest& request)
+void WorkerServiceClient::send_reassign(const std::vector<std::string> & shard_paths)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("reassign", ::apache::thrift::protocol::T_CALL, cseqid);
 
   WorkerService_reassign_pargs args;
-  args.request = &request;
+  args.shard_paths = &shard_paths;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -800,7 +806,7 @@ void WorkerServiceProcessor::process_heartbeat(int32_t seqid, ::apache::thrift::
 
   WorkerService_heartbeat_result result;
   try {
-    iface_->heartbeat(result.success, args.request);
+    iface_->heartbeat(result.success);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -960,7 +966,7 @@ void WorkerServiceProcessor::process_reassign(int32_t seqid, ::apache::thrift::p
 
   WorkerService_reassign_result result;
   try {
-    iface_->reassign(args.request);
+    iface_->reassign(args.shard_paths);
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "WorkerService.reassign");

@@ -351,145 +351,8 @@ void swap(Params &a, Params &b) {
   swap(a.__isset, b.__isset);
 }
 
-const char* ServerInfo::ascii_fingerprint = "EEBC915CE44901401D881E6091423036";
-const uint8_t ServerInfo::binary_fingerprint[16] = {0xEE,0xBC,0x91,0x5C,0xE4,0x49,0x01,0x40,0x1D,0x88,0x1E,0x60,0x91,0x42,0x30,0x36};
-
-uint32_t ServerInfo::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->ip);
-          this->__isset.ip = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 2:
-        if (ftype == ::apache::thrift::protocol::T_I32) {
-          xfer += iprot->readI32(this->port);
-          this->__isset.port = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t ServerInfo::write(::apache::thrift::protocol::TProtocol* oprot) const {
-  uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("ServerInfo");
-
-  xfer += oprot->writeFieldBegin("ip", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->ip);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("port", ::apache::thrift::protocol::T_I32, 2);
-  xfer += oprot->writeI32(this->port);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-void swap(ServerInfo &a, ServerInfo &b) {
-  using ::std::swap;
-  swap(a.ip, b.ip);
-  swap(a.port, b.port);
-  swap(a.__isset, b.__isset);
-}
-
-const char* AnnounceRequest::ascii_fingerprint = "2BD9E1CC52BCB0899198EEADB3593B00";
-const uint8_t AnnounceRequest::binary_fingerprint[16] = {0x2B,0xD9,0xE1,0xCC,0x52,0xBC,0xB0,0x89,0x91,0x98,0xEE,0xAD,0xB3,0x59,0x3B,0x00};
-
-uint32_t AnnounceRequest::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->worker_info.read(iprot);
-          this->__isset.worker_info = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t AnnounceRequest::write(::apache::thrift::protocol::TProtocol* oprot) const {
-  uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("AnnounceRequest");
-
-  xfer += oprot->writeFieldBegin("worker_info", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += this->worker_info.write(oprot);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-void swap(AnnounceRequest &a, AnnounceRequest &b) {
-  using ::std::swap;
-  swap(a.worker_info, b.worker_info);
-  swap(a.__isset, b.__isset);
-}
-
-const char* AnnounceResponse::ascii_fingerprint = "AFBEB144070F2944B0ABB54DD68305D0";
-const uint8_t AnnounceResponse::binary_fingerprint[16] = {0xAF,0xBE,0xB1,0x44,0x07,0x0F,0x29,0x44,0xB0,0xAB,0xB5,0x4D,0xD6,0x83,0x05,0xD0};
+const char* AnnounceResponse::ascii_fingerprint = "30873D235B4A3B68B67FF6A2E6BDE934";
+const uint8_t AnnounceResponse::binary_fingerprint[16] = {0x30,0x87,0x3D,0x23,0x5B,0x4A,0x3B,0x68,0xB6,0x7F,0xF6,0xA2,0xE6,0xBD,0xE9,0x34};
 
 uint32_t AnnounceResponse::read(::apache::thrift::protocol::TProtocol* iprot) {
 
@@ -555,26 +418,6 @@ uint32_t AnnounceResponse::read(::apache::thrift::protocol::TProtocol* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 5:
-        if (ftype == ::apache::thrift::protocol::T_LIST) {
-          {
-            this->param_servers.clear();
-            uint32_t _size35;
-            ::apache::thrift::protocol::TType _etype38;
-            xfer += iprot->readListBegin(_etype38, _size35);
-            this->param_servers.resize(_size35);
-            uint32_t _i39;
-            for (_i39 = 0; _i39 < _size35; ++_i39)
-            {
-              xfer += this->param_servers[_i39].read(iprot);
-            }
-            xfer += iprot->readListEnd();
-          }
-          this->__isset.param_servers = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -602,10 +445,10 @@ uint32_t AnnounceResponse::write(::apache::thrift::protocol::TProtocol* oprot) c
   xfer += oprot->writeFieldBegin("shard_paths", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->shard_paths.size()));
-    std::vector<std::string> ::const_iterator _iter40;
-    for (_iter40 = this->shard_paths.begin(); _iter40 != this->shard_paths.end(); ++_iter40)
+    std::vector<std::string> ::const_iterator _iter35;
+    for (_iter35 = this->shard_paths.begin(); _iter35 != this->shard_paths.end(); ++_iter35)
     {
-      xfer += oprot->writeString((*_iter40));
+      xfer += oprot->writeString((*_iter35));
     }
     xfer += oprot->writeListEnd();
   }
@@ -613,18 +456,6 @@ uint32_t AnnounceResponse::write(::apache::thrift::protocol::TProtocol* oprot) c
 
   xfer += oprot->writeFieldBegin("learn_rate", ::apache::thrift::protocol::T_DOUBLE, 4);
   xfer += oprot->writeDouble(this->learn_rate);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("param_servers", ::apache::thrift::protocol::T_LIST, 5);
-  {
-    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->param_servers.size()));
-    std::vector<ServerInfo> ::const_iterator _iter41;
-    for (_iter41 = this->param_servers.begin(); _iter41 != this->param_servers.end(); ++_iter41)
-    {
-      xfer += (*_iter41).write(oprot);
-    }
-    xfer += oprot->writeListEnd();
-  }
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -638,393 +469,11 @@ void swap(AnnounceResponse &a, AnnounceResponse &b) {
   swap(a.params, b.params);
   swap(a.shard_paths, b.shard_paths);
   swap(a.learn_rate, b.learn_rate);
-  swap(a.param_servers, b.param_servers);
   swap(a.__isset, b.__isset);
 }
 
-const char* UpdateRequest::ascii_fingerprint = "5252BFD9FD3B10A47FE26840939EECE6";
-const uint8_t UpdateRequest::binary_fingerprint[16] = {0x52,0x52,0xBF,0xD9,0xFD,0x3B,0x10,0xA4,0x7F,0xE2,0x68,0x40,0x93,0x9E,0xEC,0xE6};
-
-uint32_t UpdateRequest::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->update.read(iprot);
-          this->__isset.update = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 2:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->worker_info.read(iprot);
-          this->__isset.worker_info = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t UpdateRequest::write(::apache::thrift::protocol::TProtocol* oprot) const {
-  uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("UpdateRequest");
-
-  xfer += oprot->writeFieldBegin("update", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += this->update.write(oprot);
-  xfer += oprot->writeFieldEnd();
-
-  if (this->__isset.worker_info) {
-    xfer += oprot->writeFieldBegin("worker_info", ::apache::thrift::protocol::T_STRUCT, 2);
-    xfer += this->worker_info.write(oprot);
-    xfer += oprot->writeFieldEnd();
-  }
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-void swap(UpdateRequest &a, UpdateRequest &b) {
-  using ::std::swap;
-  swap(a.update, b.update);
-  swap(a.worker_info, b.worker_info);
-  swap(a.__isset, b.__isset);
-}
-
-const char* UpdateResponse::ascii_fingerprint = "E3BAB2DD3B420D9247DE4278A71DC1B0";
-const uint8_t UpdateResponse::binary_fingerprint[16] = {0xE3,0xBA,0xB2,0xDD,0x3B,0x42,0x0D,0x92,0x47,0xDE,0x42,0x78,0xA7,0x1D,0xC1,0xB0};
-
-uint32_t UpdateResponse::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_LIST) {
-          {
-            this->param_servers.clear();
-            uint32_t _size42;
-            ::apache::thrift::protocol::TType _etype45;
-            xfer += iprot->readListBegin(_etype45, _size42);
-            this->param_servers.resize(_size42);
-            uint32_t _i46;
-            for (_i46 = 0; _i46 < _size42; ++_i46)
-            {
-              xfer += this->param_servers[_i46].read(iprot);
-            }
-            xfer += iprot->readListEnd();
-          }
-          this->__isset.param_servers = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t UpdateResponse::write(::apache::thrift::protocol::TProtocol* oprot) const {
-  uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("UpdateResponse");
-
-  if (this->__isset.param_servers) {
-    xfer += oprot->writeFieldBegin("param_servers", ::apache::thrift::protocol::T_LIST, 1);
-    {
-      xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->param_servers.size()));
-      std::vector<ServerInfo> ::const_iterator _iter47;
-      for (_iter47 = this->param_servers.begin(); _iter47 != this->param_servers.end(); ++_iter47)
-      {
-        xfer += (*_iter47).write(oprot);
-      }
-      xfer += oprot->writeListEnd();
-    }
-    xfer += oprot->writeFieldEnd();
-  }
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-void swap(UpdateResponse &a, UpdateResponse &b) {
-  using ::std::swap;
-  swap(a.param_servers, b.param_servers);
-  swap(a.__isset, b.__isset);
-}
-
-const char* PullRequest::ascii_fingerprint = "45F07C5FAF8C5003DA143A45C267ADFE";
-const uint8_t PullRequest::binary_fingerprint[16] = {0x45,0xF0,0x7C,0x5F,0xAF,0x8C,0x50,0x03,0xDA,0x14,0x3A,0x45,0xC2,0x67,0xAD,0xFE};
-
-uint32_t PullRequest::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->worker_info.read(iprot);
-          this->__isset.worker_info = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t PullRequest::write(::apache::thrift::protocol::TProtocol* oprot) const {
-  uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("PullRequest");
-
-  if (this->__isset.worker_info) {
-    xfer += oprot->writeFieldBegin("worker_info", ::apache::thrift::protocol::T_STRUCT, 1);
-    xfer += this->worker_info.write(oprot);
-    xfer += oprot->writeFieldEnd();
-  }
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-void swap(PullRequest &a, PullRequest &b) {
-  using ::std::swap;
-  swap(a.worker_info, b.worker_info);
-  swap(a.__isset, b.__isset);
-}
-
-const char* PullResponse::ascii_fingerprint = "76FE0E92C52E0EC69A75E4CF3AE83DEF";
-const uint8_t PullResponse::binary_fingerprint[16] = {0x76,0xFE,0x0E,0x92,0xC5,0x2E,0x0E,0xC6,0x9A,0x75,0xE4,0xCF,0x3A,0xE8,0x3D,0xEF};
-
-uint32_t PullResponse::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->params.read(iprot);
-          this->__isset.params = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 2:
-        if (ftype == ::apache::thrift::protocol::T_LIST) {
-          {
-            this->param_servers.clear();
-            uint32_t _size48;
-            ::apache::thrift::protocol::TType _etype51;
-            xfer += iprot->readListBegin(_etype51, _size48);
-            this->param_servers.resize(_size48);
-            uint32_t _i52;
-            for (_i52 = 0; _i52 < _size48; ++_i52)
-            {
-              xfer += this->param_servers[_i52].read(iprot);
-            }
-            xfer += iprot->readListEnd();
-          }
-          this->__isset.param_servers = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t PullResponse::write(::apache::thrift::protocol::TProtocol* oprot) const {
-  uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("PullResponse");
-
-  xfer += oprot->writeFieldBegin("params", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += this->params.write(oprot);
-  xfer += oprot->writeFieldEnd();
-
-  if (this->__isset.param_servers) {
-    xfer += oprot->writeFieldBegin("param_servers", ::apache::thrift::protocol::T_LIST, 2);
-    {
-      xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->param_servers.size()));
-      std::vector<ServerInfo> ::const_iterator _iter53;
-      for (_iter53 = this->param_servers.begin(); _iter53 != this->param_servers.end(); ++_iter53)
-      {
-        xfer += (*_iter53).write(oprot);
-      }
-      xfer += oprot->writeListEnd();
-    }
-    xfer += oprot->writeFieldEnd();
-  }
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-void swap(PullResponse &a, PullResponse &b) {
-  using ::std::swap;
-  swap(a.params, b.params);
-  swap(a.param_servers, b.param_servers);
-  swap(a.__isset, b.__isset);
-}
-
-const char* HBRequest::ascii_fingerprint = "45F07C5FAF8C5003DA143A45C267ADFE";
-const uint8_t HBRequest::binary_fingerprint[16] = {0x45,0xF0,0x7C,0x5F,0xAF,0x8C,0x50,0x03,0xDA,0x14,0x3A,0x45,0xC2,0x67,0xAD,0xFE};
-
-uint32_t HBRequest::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->master_info.read(iprot);
-          this->__isset.master_info = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t HBRequest::write(::apache::thrift::protocol::TProtocol* oprot) const {
-  uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("HBRequest");
-
-  if (this->__isset.master_info) {
-    xfer += oprot->writeFieldBegin("master_info", ::apache::thrift::protocol::T_STRUCT, 1);
-    xfer += this->master_info.write(oprot);
-    xfer += oprot->writeFieldEnd();
-  }
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-void swap(HBRequest &a, HBRequest &b) {
-  using ::std::swap;
-  swap(a.master_info, b.master_info);
-  swap(a.__isset, b.__isset);
-}
-
-const char* HBResponse::ascii_fingerprint = "45F07C5FAF8C5003DA143A45C267ADFE";
-const uint8_t HBResponse::binary_fingerprint[16] = {0x45,0xF0,0x7C,0x5F,0xAF,0x8C,0x50,0x03,0xDA,0x14,0x3A,0x45,0xC2,0x67,0xAD,0xFE};
+const char* HBResponse::ascii_fingerprint = "ACE4F644F0FDD289DDC4EE5B83BC13C0";
+const uint8_t HBResponse::binary_fingerprint[16] = {0xAC,0xE4,0xF6,0x44,0xF0,0xFD,0xD2,0x89,0xDD,0xC4,0xEE,0x5B,0x83,0xBC,0x13,0xC0};
 
 uint32_t HBResponse::read(::apache::thrift::protocol::TProtocol* iprot) {
 
@@ -1047,9 +496,21 @@ uint32_t HBResponse::read(::apache::thrift::protocol::TProtocol* iprot) {
     switch (fid)
     {
       case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->worker_info.read(iprot);
-          this->__isset.worker_info = true;
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->completed_shards.clear();
+            uint32_t _size36;
+            ::apache::thrift::protocol::TType _etype39;
+            xfer += iprot->readListBegin(_etype39, _size36);
+            this->completed_shards.resize(_size36);
+            uint32_t _i40;
+            for (_i40 = 0; _i40 < _size36; ++_i40)
+            {
+              xfer += iprot->readString(this->completed_shards[_i40]);
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.completed_shards = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -1070,11 +531,18 @@ uint32_t HBResponse::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("HBResponse");
 
-  if (this->__isset.worker_info) {
-    xfer += oprot->writeFieldBegin("worker_info", ::apache::thrift::protocol::T_STRUCT, 1);
-    xfer += this->worker_info.write(oprot);
-    xfer += oprot->writeFieldEnd();
+  xfer += oprot->writeFieldBegin("completed_shards", ::apache::thrift::protocol::T_LIST, 1);
+  {
+    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->completed_shards.size()));
+    std::vector<std::string> ::const_iterator _iter41;
+    for (_iter41 = this->completed_shards.begin(); _iter41 != this->completed_shards.end(); ++_iter41)
+    {
+      xfer += oprot->writeString((*_iter41));
+    }
+    xfer += oprot->writeListEnd();
   }
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -1082,7 +550,7 @@ uint32_t HBResponse::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
 void swap(HBResponse &a, HBResponse &b) {
   using ::std::swap;
-  swap(a.worker_info, b.worker_info);
+  swap(a.completed_shards, b.completed_shards);
   swap(a.__isset, b.__isset);
 }
 
@@ -1113,14 +581,14 @@ uint32_t StartRequest::read(::apache::thrift::protocol::TProtocol* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->shard_paths.clear();
-            uint32_t _size54;
-            ::apache::thrift::protocol::TType _etype57;
-            xfer += iprot->readListBegin(_etype57, _size54);
-            this->shard_paths.resize(_size54);
-            uint32_t _i58;
-            for (_i58 = 0; _i58 < _size54; ++_i58)
+            uint32_t _size42;
+            ::apache::thrift::protocol::TType _etype45;
+            xfer += iprot->readListBegin(_etype45, _size42);
+            this->shard_paths.resize(_size42);
+            uint32_t _i46;
+            for (_i46 = 0; _i46 < _size42; ++_i46)
             {
-              xfer += iprot->readString(this->shard_paths[_i58]);
+              xfer += iprot->readString(this->shard_paths[_i46]);
             }
             xfer += iprot->readListEnd();
           }
@@ -1156,10 +624,10 @@ uint32_t StartRequest::write(::apache::thrift::protocol::TProtocol* oprot) const
   xfer += oprot->writeFieldBegin("shard_paths", ::apache::thrift::protocol::T_LIST, 1);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->shard_paths.size()));
-    std::vector<std::string> ::const_iterator _iter59;
-    for (_iter59 = this->shard_paths.begin(); _iter59 != this->shard_paths.end(); ++_iter59)
+    std::vector<std::string> ::const_iterator _iter47;
+    for (_iter47 = this->shard_paths.begin(); _iter47 != this->shard_paths.end(); ++_iter47)
     {
-      xfer += oprot->writeString((*_iter59));
+      xfer += oprot->writeString((*_iter47));
     }
     xfer += oprot->writeListEnd();
   }
@@ -1178,88 +646,6 @@ void swap(StartRequest &a, StartRequest &b) {
   using ::std::swap;
   swap(a.shard_paths, b.shard_paths);
   swap(a.learn_rate, b.learn_rate);
-  swap(a.__isset, b.__isset);
-}
-
-const char* ReassignRequest::ascii_fingerprint = "ACE4F644F0FDD289DDC4EE5B83BC13C0";
-const uint8_t ReassignRequest::binary_fingerprint[16] = {0xAC,0xE4,0xF6,0x44,0xF0,0xFD,0xD2,0x89,0xDD,0xC4,0xEE,0x5B,0x83,0xBC,0x13,0xC0};
-
-uint32_t ReassignRequest::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_LIST) {
-          {
-            this->shard_paths.clear();
-            uint32_t _size60;
-            ::apache::thrift::protocol::TType _etype63;
-            xfer += iprot->readListBegin(_etype63, _size60);
-            this->shard_paths.resize(_size60);
-            uint32_t _i64;
-            for (_i64 = 0; _i64 < _size60; ++_i64)
-            {
-              xfer += iprot->readString(this->shard_paths[_i64]);
-            }
-            xfer += iprot->readListEnd();
-          }
-          this->__isset.shard_paths = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t ReassignRequest::write(::apache::thrift::protocol::TProtocol* oprot) const {
-  uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("ReassignRequest");
-
-  xfer += oprot->writeFieldBegin("shard_paths", ::apache::thrift::protocol::T_LIST, 1);
-  {
-    xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->shard_paths.size()));
-    std::vector<std::string> ::const_iterator _iter65;
-    for (_iter65 = this->shard_paths.begin(); _iter65 != this->shard_paths.end(); ++_iter65)
-    {
-      xfer += oprot->writeString((*_iter65));
-    }
-    xfer += oprot->writeListEnd();
-  }
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-void swap(ReassignRequest &a, ReassignRequest &b) {
-  using ::std::swap;
-  swap(a.shard_paths, b.shard_paths);
   swap(a.__isset, b.__isset);
 }
 

@@ -38,53 +38,22 @@ struct Params {
     5: list<double> hidden_output_biases,
 }
 
-/**
- * Server information.
- */
-struct ServerInfo {
-    1: string ip,
-    2: i32 port,
-}
-
-struct AnnounceRequest {
-    1: ServerInfo worker_info,
-}
-
 struct AnnounceResponse {
     1: ModelInfo model_info,
     2: Params params,
     3: list<string> shard_paths,
-    4: double learn_rate,
-    5: list<ServerInfo> param_servers,
-}
-
-struct UpdateRequest {
-    1: Params update,
-    2: optional ServerInfo worker_info,
-}
-
-struct UpdateResponse {
-    1: optional list<ServerInfo> param_servers,
-}
-
-struct PullRequest {
-    1: optional ServerInfo worker_info,
-}
-
-struct PullResponse {
-    1: Params params,
-    2: optional list<ServerInfo> param_servers,
+    4: double learn_rate
 }
 
 service ParamService {
     // Announce a worker to the master
-    AnnounceResponse announce(1:AnnounceRequest request),
+    AnnounceResponse announce(),
 
     // Push a parameter update to the master
-    UpdateResponse push_update(1:UpdateRequest request),
+    void push_update(1:Params params),
 
     // Request up-to-date parameters from the master
-    PullResponse pull_params(1:PullRequest request),
+    Params pull_params(),
 }
 
 
@@ -92,12 +61,8 @@ service ParamService {
  *  Worker service definition
  * ----------------------------- */
 
-struct HBRequest {
-    1: optional ServerInfo master_info,
-}
-
 struct HBResponse {
-    1: optional ServerInfo worker_info,
+    1: list<string> completed_shards,
 }
 
 /**
@@ -107,12 +72,8 @@ struct StartRequest {
     // Paths to dataset shard files on disk
     1: list<string> shard_paths,
 
-    // Learning rate
+    // Initial learning rate
     2: double learn_rate
-}
-
-struct ReassignRequest {
-    1: list<string> shard_paths,
 }
 
 /**
@@ -120,7 +81,7 @@ struct ReassignRequest {
  */
 service WorkerService {
     // A heartbeat to check if worker is alive
-    HBResponse heartbeat(1:HBRequest request),
+    HBResponse heartbeat(),
 
     // Start computation on a set of shards
     void start(1:StartRequest request),
@@ -129,5 +90,5 @@ service WorkerService {
     void stop(),
 
     // Reassign shards to worker
-    void reassign(1:ReassignRequest request),
+    void reassign(1:list<string> shard_paths),
 }

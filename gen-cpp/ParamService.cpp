@@ -26,20 +26,7 @@ uint32_t ParamService_announce_args::read(::apache::thrift::protocol::TProtocol*
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->request.read(iprot);
-          this->__isset.request = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
+    xfer += iprot->skip(ftype);
     xfer += iprot->readFieldEnd();
   }
 
@@ -52,10 +39,6 @@ uint32_t ParamService_announce_args::write(::apache::thrift::protocol::TProtocol
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("ParamService_announce_args");
 
-  xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += this->request.write(oprot);
-  xfer += oprot->writeFieldEnd();
-
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -64,10 +47,6 @@ uint32_t ParamService_announce_args::write(::apache::thrift::protocol::TProtocol
 uint32_t ParamService_announce_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("ParamService_announce_pargs");
-
-  xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += (*(this->request)).write(oprot);
-  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -192,8 +171,8 @@ uint32_t ParamService_push_update_args::read(::apache::thrift::protocol::TProtoc
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->request.read(iprot);
-          this->__isset.request = true;
+          xfer += this->params.read(iprot);
+          this->__isset.params = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -214,8 +193,8 @@ uint32_t ParamService_push_update_args::write(::apache::thrift::protocol::TProto
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("ParamService_push_update_args");
 
-  xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += this->request.write(oprot);
+  xfer += oprot->writeFieldBegin("params", ::apache::thrift::protocol::T_STRUCT, 1);
+  xfer += this->params.write(oprot);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -227,8 +206,8 @@ uint32_t ParamService_push_update_pargs::write(::apache::thrift::protocol::TProt
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("ParamService_push_update_pargs");
 
-  xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += (*(this->request)).write(oprot);
+  xfer += oprot->writeFieldBegin("params", ::apache::thrift::protocol::T_STRUCT, 1);
+  xfer += (*(this->params)).write(oprot);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -254,20 +233,7 @@ uint32_t ParamService_push_update_result::read(::apache::thrift::protocol::TProt
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->success.read(iprot);
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
+    xfer += iprot->skip(ftype);
     xfer += iprot->readFieldEnd();
   }
 
@@ -282,11 +248,6 @@ uint32_t ParamService_push_update_result::write(::apache::thrift::protocol::TPro
 
   xfer += oprot->writeStructBegin("ParamService_push_update_result");
 
-  if (this->__isset.success) {
-    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRUCT, 0);
-    xfer += this->success.write(oprot);
-    xfer += oprot->writeFieldEnd();
-  }
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -310,20 +271,7 @@ uint32_t ParamService_push_update_presult::read(::apache::thrift::protocol::TPro
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += (*(this->success)).read(iprot);
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
+    xfer += iprot->skip(ftype);
     xfer += iprot->readFieldEnd();
   }
 
@@ -350,20 +298,7 @@ uint32_t ParamService_pull_params_args::read(::apache::thrift::protocol::TProtoc
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->request.read(iprot);
-          this->__isset.request = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
+    xfer += iprot->skip(ftype);
     xfer += iprot->readFieldEnd();
   }
 
@@ -376,10 +311,6 @@ uint32_t ParamService_pull_params_args::write(::apache::thrift::protocol::TProto
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("ParamService_pull_params_args");
 
-  xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += this->request.write(oprot);
-  xfer += oprot->writeFieldEnd();
-
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -388,10 +319,6 @@ uint32_t ParamService_pull_params_args::write(::apache::thrift::protocol::TProto
 uint32_t ParamService_pull_params_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("ParamService_pull_params_pargs");
-
-  xfer += oprot->writeFieldBegin("request", ::apache::thrift::protocol::T_STRUCT, 1);
-  xfer += (*(this->request)).write(oprot);
-  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -494,19 +421,18 @@ uint32_t ParamService_pull_params_presult::read(::apache::thrift::protocol::TPro
   return xfer;
 }
 
-void ParamServiceClient::announce(AnnounceResponse& _return, const AnnounceRequest& request)
+void ParamServiceClient::announce(AnnounceResponse& _return)
 {
-  send_announce(request);
+  send_announce();
   recv_announce(_return);
 }
 
-void ParamServiceClient::send_announce(const AnnounceRequest& request)
+void ParamServiceClient::send_announce()
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("announce", ::apache::thrift::protocol::T_CALL, cseqid);
 
   ParamService_announce_pargs args;
-  args.request = &request;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -552,19 +478,19 @@ void ParamServiceClient::recv_announce(AnnounceResponse& _return)
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "announce failed: unknown result");
 }
 
-void ParamServiceClient::push_update(UpdateResponse& _return, const UpdateRequest& request)
+void ParamServiceClient::push_update(const Params& params)
 {
-  send_push_update(request);
-  recv_push_update(_return);
+  send_push_update(params);
+  recv_push_update();
 }
 
-void ParamServiceClient::send_push_update(const UpdateRequest& request)
+void ParamServiceClient::send_push_update(const Params& params)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("push_update", ::apache::thrift::protocol::T_CALL, cseqid);
 
   ParamService_push_update_pargs args;
-  args.request = &request;
+  args.params = &params;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -572,7 +498,7 @@ void ParamServiceClient::send_push_update(const UpdateRequest& request)
   oprot_->getTransport()->flush();
 }
 
-void ParamServiceClient::recv_push_update(UpdateResponse& _return)
+void ParamServiceClient::recv_push_update()
 {
 
   int32_t rseqid = 0;
@@ -598,31 +524,25 @@ void ParamServiceClient::recv_push_update(UpdateResponse& _return)
     iprot_->getTransport()->readEnd();
   }
   ParamService_push_update_presult result;
-  result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
   iprot_->getTransport()->readEnd();
 
-  if (result.__isset.success) {
-    // _return pointer has now been filled
-    return;
-  }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "push_update failed: unknown result");
+  return;
 }
 
-void ParamServiceClient::pull_params(PullResponse& _return, const PullRequest& request)
+void ParamServiceClient::pull_params(Params& _return)
 {
-  send_pull_params(request);
+  send_pull_params();
   recv_pull_params(_return);
 }
 
-void ParamServiceClient::send_pull_params(const PullRequest& request)
+void ParamServiceClient::send_pull_params()
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("pull_params", ::apache::thrift::protocol::T_CALL, cseqid);
 
   ParamService_pull_params_pargs args;
-  args.request = &request;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -630,7 +550,7 @@ void ParamServiceClient::send_pull_params(const PullRequest& request)
   oprot_->getTransport()->flush();
 }
 
-void ParamServiceClient::recv_pull_params(PullResponse& _return)
+void ParamServiceClient::recv_pull_params(Params& _return)
 {
 
   int32_t rseqid = 0;
@@ -710,7 +630,7 @@ void ParamServiceProcessor::process_announce(int32_t seqid, ::apache::thrift::pr
 
   ParamService_announce_result result;
   try {
-    iface_->announce(result.success, args.request);
+    iface_->announce(result.success);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -764,8 +684,7 @@ void ParamServiceProcessor::process_push_update(int32_t seqid, ::apache::thrift:
 
   ParamService_push_update_result result;
   try {
-    iface_->push_update(result.success, args.request);
-    result.__isset.success = true;
+    iface_->push_update(args.params);
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "ParamService.push_update");
@@ -818,7 +737,7 @@ void ParamServiceProcessor::process_pull_params(int32_t seqid, ::apache::thrift:
 
   ParamService_pull_params_result result;
   try {
-    iface_->pull_params(result.success, args.request);
+    iface_->pull_params(result.success);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
