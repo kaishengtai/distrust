@@ -1,5 +1,4 @@
 INCDIRS = -I/usr/local/include/thrift \
-		  -Ilib \
 		  -I..
 
 CXXFLAGS := -Wall \
@@ -8,12 +7,13 @@ CXXFLAGS := -Wall \
 			-Wno-unused-variable \
    			-O2 \
    			-g \
+   			-pthread \
    			-std=c++11 \
    			$(INCDIRS)
 
 LDFLAGS := -L/usr/local/lib -L../logcabin/build
 
-LIBS := -lthrift -llogcabin -lprotobuf
+LIBS := -lthrift -llogcabin -lprotobuf -lpthread
 
 THRIFT_SRC := \
 	gen-cpp/WorkerService.cpp \

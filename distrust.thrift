@@ -47,7 +47,7 @@ struct AnnounceResponse {
 
 service ParamService {
     // Announce a worker to the master
-    AnnounceResponse announce(),
+    AnnounceResponse announce(1:i32 worker_port),
 
     // Push a parameter update to the master
     void push_update(1:Params params),

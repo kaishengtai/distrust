@@ -22,7 +22,7 @@ class ParamServiceHandler : virtual public ParamServiceIf {
     // Your initialization goes here
   }
 
-  void announce(AnnounceResponse& _return) {
+  void announce(AnnounceResponse& _return, const int32_t worker_port) {
     // Your implementation goes here
     printf("announce\n");
   }

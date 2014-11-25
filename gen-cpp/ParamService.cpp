@@ -26,7 +26,20 @@ uint32_t ParamService_announce_args::read(::apache::thrift::protocol::TProtocol*
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    xfer += iprot->skip(ftype);
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->worker_port);
+          this->__isset.worker_port = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
     xfer += iprot->readFieldEnd();
   }
 
@@ -39,6 +52,10 @@ uint32_t ParamService_announce_args::write(::apache::thrift::protocol::TProtocol
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("ParamService_announce_args");
 
+  xfer += oprot->writeFieldBegin("worker_port", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->worker_port);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -47,6 +64,10 @@ uint32_t ParamService_announce_args::write(::apache::thrift::protocol::TProtocol
 uint32_t ParamService_announce_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   xfer += oprot->writeStructBegin("ParamService_announce_pargs");
+
+  xfer += oprot->writeFieldBegin("worker_port", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->worker_port)));
+  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -421,18 +442,19 @@ uint32_t ParamService_pull_params_presult::read(::apache::thrift::protocol::TPro
   return xfer;
 }
 
-void ParamServiceClient::announce(AnnounceResponse& _return)
+void ParamServiceClient::announce(AnnounceResponse& _return, const int32_t worker_port)
 {
-  send_announce();
+  send_announce(worker_port);
   recv_announce(_return);
 }
 
-void ParamServiceClient::send_announce()
+void ParamServiceClient::send_announce(const int32_t worker_port)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("announce", ::apache::thrift::protocol::T_CALL, cseqid);
 
   ParamService_announce_pargs args;
+  args.worker_port = &worker_port;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -630,7 +652,7 @@ void ParamServiceProcessor::process_announce(int32_t seqid, ::apache::thrift::pr
 
   ParamService_announce_result result;
   try {
-    iface_->announce(result.success);
+    iface_->announce(result.success, args.worker_port);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {

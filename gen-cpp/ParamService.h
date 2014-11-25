@@ -15,7 +15,7 @@ namespace distrust {
 class ParamServiceIf {
  public:
   virtual ~ParamServiceIf() {}
-  virtual void announce(AnnounceResponse& _return) = 0;
+  virtual void announce(AnnounceResponse& _return, const int32_t worker_port) = 0;
   virtual void push_update(const Params& params) = 0;
   virtual void pull_params(Params& _return) = 0;
 };
@@ -47,7 +47,7 @@ class ParamServiceIfSingletonFactory : virtual public ParamServiceIfFactory {
 class ParamServiceNull : virtual public ParamServiceIf {
  public:
   virtual ~ParamServiceNull() {}
-  void announce(AnnounceResponse& /* _return */) {
+  void announce(AnnounceResponse& /* _return */, const int32_t /* worker_port */) {
     return;
   }
   void push_update(const Params& /* params */) {
@@ -58,18 +58,31 @@ class ParamServiceNull : virtual public ParamServiceIf {
   }
 };
 
+typedef struct _ParamService_announce_args__isset {
+  _ParamService_announce_args__isset() : worker_port(false) {}
+  bool worker_port;
+} _ParamService_announce_args__isset;
 
 class ParamService_announce_args {
  public:
 
-  ParamService_announce_args() {
+  ParamService_announce_args() : worker_port(0) {
   }
 
   virtual ~ParamService_announce_args() throw() {}
 
+  int32_t worker_port;
 
-  bool operator == (const ParamService_announce_args & /* rhs */) const
+  _ParamService_announce_args__isset __isset;
+
+  void __set_worker_port(const int32_t val) {
+    worker_port = val;
+  }
+
+  bool operator == (const ParamService_announce_args & rhs) const
   {
+    if (!(worker_port == rhs.worker_port))
+      return false;
     return true;
   }
   bool operator != (const ParamService_announce_args &rhs) const {
@@ -90,6 +103,7 @@ class ParamService_announce_pargs {
 
   virtual ~ParamService_announce_pargs() throw() {}
 
+  const int32_t* worker_port;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
@@ -354,8 +368,8 @@ class ParamServiceClient : virtual public ParamServiceIf {
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
-  void announce(AnnounceResponse& _return);
-  void send_announce();
+  void announce(AnnounceResponse& _return, const int32_t worker_port);
+  void send_announce(const int32_t worker_port);
   void recv_announce(AnnounceResponse& _return);
   void push_update(const Params& params);
   void send_push_update(const Params& params);
@@ -415,13 +429,13 @@ class ParamServiceMultiface : virtual public ParamServiceIf {
     ifaces_.push_back(iface);
   }
  public:
-  void announce(AnnounceResponse& _return) {
+  void announce(AnnounceResponse& _return, const int32_t worker_port) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->announce(_return);
+      ifaces_[i]->announce(_return, worker_port);
     }
-    ifaces_[i]->announce(_return);
+    ifaces_[i]->announce(_return, worker_port);
     return;
   }
 

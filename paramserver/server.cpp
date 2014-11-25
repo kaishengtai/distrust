@@ -1,32 +1,74 @@
 #include "distrust/gen-cpp/ParamService.h"
+#include "distrust/gen-cpp/WorkerService.h"
 #include "logcabin/Client/Client.h"
+
 #include <getopt.h>
 #include <transport/TSocket.h>
 #include <thrift/protocol/TBinaryProtocol.h>
-#include <thrift/server/TSimpleServer.h>
+#include <thrift/server/TThreadedServer.h>
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
 
-using namespace ::apache::thrift;
-using namespace ::apache::thrift::protocol;
-using namespace ::apache::thrift::transport;
-using namespace ::apache::thrift::server;
+using namespace apache::thrift;
+using namespace apache::thrift::protocol;
+using namespace apache::thrift::transport;
+using namespace apache::thrift::server;
 
 using LogCabin::Client::Cluster;
 using LogCabin::Client::Tree;
 
 using boost::shared_ptr;
 
-using namespace  ::distrust;
+using namespace distrust;
 
 class ParamServiceHandler : virtual public ParamServiceIf {
  public:
-  ParamServiceHandler(const std::string &logcabin_cluster)
-      : cluster_(logcabin_cluster) {
-  }
+  ParamServiceHandler(
+    const std::string &logcabin_cluster,
+    const std::string &worker_ip)
+      : cluster_(logcabin_cluster),
+        worker_ip_(worker_ip) { }
 
-  void announce(AnnounceResponse& _return) {
-    printf("announce\n");
+  void announce(AnnounceResponse& _return, const int32_t worker_port) {
+    // Open reverse connection
+    std::cout << "Announce from " << worker_ip_ << std::endl;
+    shared_ptr<TSocket> socket(new TSocket(worker_ip_, worker_port));
+    shared_ptr<TTransport> transport(new TBufferedTransport(socket));
+    shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+    worker_client_ = std::unique_ptr<WorkerServiceClient>(
+      new WorkerServiceClient(protocol));
+    while (true) {
+      try {
+        transport->open();
+        break;
+      } catch (const TException &tx) {
+        std::cerr << "Transport error: " << tx.what() << std::endl;
+      }
+      sleep(1);
+    }
+    std::cout << "Connected to " << worker_ip_ << ":" << worker_port << std::endl;
+
+    worker_client_->stop();
+
+    // Return parameters
+    // TODO: replace hardcoded values
+    _return.model_info.window_size = 5;
+    _return.model_info.vocab_size = 40000;
+    _return.model_info.start_token_index = 1;
+    _return.model_info.end_token_index = 2;
+    _return.model_info.wordvec_dim = 128;
+    _return.model_info.hidden_dim = 256;
+
+    _return.params.wordvec_weights.push_back(1.0);
+    _return.params.input_hidden_weights.push_back(1.0);
+    _return.params.input_hidden_biases.push_back(1.0);
+    _return.params.hidden_output_weights.push_back(1.0);
+    _return.params.hidden_output_biases.push_back(1.0);
+
+    _return.shard_paths.push_back("/foo/bar/");
+    _return.shard_paths.push_back("/foo/baz/");
+
+    _return.learn_rate = 0.1;
   }
 
   void push_update(const Params& params) {
@@ -39,21 +81,22 @@ class ParamServiceHandler : virtual public ParamServiceIf {
 
  private:
   Cluster cluster_;
+  std::string worker_ip_;
+  std::unique_ptr<WorkerServiceClient> worker_client_;
 };
 
 class ParamServiceHandlerFactory : virtual public ParamServiceIfFactory {
  public:
   ParamServiceHandlerFactory(const std::string& cluster): cluster_(cluster) { }
+
+  // This can be used to open a reverse connection from paramserver to worker
   ParamServiceHandler* getHandler(const TConnectionInfo& connInfo) {
-    std::cout << "Get handler" << std::endl;
-    shared_ptr<TSocket> socket = boost::dynamic_pointer_cast<TSocket>(connInfo.transport);
-    std::cout << "ip: " << socket->getPeerAddress() << std::endl;
-    std::cout << "port: " << socket->getPeerPort() << std::endl;
-    return new ParamServiceHandler(cluster_);
+    shared_ptr<TSocket> socket = boost::dynamic_pointer_cast<TSocket>(
+      connInfo.transport);
+    return new ParamServiceHandler(cluster_, socket->getPeerAddress());
   }
 
   void releaseHandler(ParamServiceIf* handler) {
-    std::cout << "Handler released" << std::endl;
     delete handler;
   }
 
@@ -137,7 +180,7 @@ int main(int argc, char **argv) {
     new TBufferedTransportFactory());
   shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
 
-  TSimpleServer server(processorFactory, serverTransport, transportFactory,
+  TThreadedServer server(processorFactory, serverTransport, transportFactory,
                        protocolFactory);
   printf("paramserver: using LogCabin cluster: %s\n", options.cluster.c_str());
   printf("paramserver: start serving on port %d\n", options.port);
