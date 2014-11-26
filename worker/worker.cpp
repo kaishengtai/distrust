@@ -74,34 +74,57 @@ void *
 Worker::announce(void *arg) {
   Worker *context = (Worker *) arg;
 
+  // Wait until the server signals that it's starting up.
   pthread_mutex_lock(&context->server_ready_lock_);
   while (!context->server_ready_) {
     pthread_cond_wait(&context->server_ready_cond_, &context->server_ready_lock_);
   }
   pthread_mutex_unlock(&context->server_ready_lock_);
 
-  // give the server time to start up
+  // Give the server time to start up
   sleep(1);
 
+  // Announce the worker to the master.
+  // No requests from the master will be received until after this point.
+  pthread_mutex_lock(&context->stop_lock_);
   AnnounceResponse resp;
   context->param_client_->announce(resp, context->worker_port_);
+
+  pthread_mutex_lock(&context->model_lock_);
   context->model_ = std::unique_ptr<LanguageModel>(
     new LanguageModel(resp.model_info));
   context->model_->init(resp.params);
+  pthread_mutex_unlock(&context->model_lock_);
+
+  pthread_mutex_lock(&context->shard_paths_lock_);
   context->shard_paths_ = resp.shard_paths;
+  pthread_mutex_unlock(&context->shard_paths_lock_);
+
   context->learn_rate_ = resp.learn_rate;
 
-  std::cout << "Received paths from master:" << std::endl;
-  for (const std::string& path : context->shard_paths_) {
-    std::cout << path << std::endl;
-  }
-
+  // Signal start of computation
+  context->stop_ = false;
+  pthread_cond_signal(&context->stop_cond_);
+  pthread_mutex_unlock(&context->stop_lock_);
   return NULL;
 }
 
 void *
 Worker::compute(void *arg) {
   Worker *context = (Worker *) arg;
+
+  while (true) {
+    pthread_mutex_lock(&context->stop_lock_);
+    while (context->stop_) {
+      pthread_cond_wait(&context->stop_cond_, &context->stop_lock_);
+    }
+
+    // Perform computation on a batch
+    std::cout << "Computing on batch" << std::endl;
+    sleep(4);
+
+    pthread_mutex_unlock(&context->stop_lock_);
+  }
 
   return NULL;
 }
@@ -110,12 +133,22 @@ void *
 Worker::push(void *arg) {
   Worker *context = (Worker *) arg;
 
+  while (true) {
+    sleep(5);
+    std::cout << "Pushing update" << std::endl;
+  }
+
   return NULL;
 }
 
 void *
 Worker::pull(void *arg) {
   Worker *context = (Worker *) arg;
+
+  while (true) {
+    sleep(5);
+    std::cout << "Pulling parameters" << std::endl;
+  }
 
   return NULL;
 }

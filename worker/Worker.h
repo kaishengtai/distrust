@@ -11,21 +11,23 @@
 
 class Worker {
 
-friend class WorkerServiceHandler;
+ friend class WorkerServiceHandler;
 
-public:
-  Worker(const std::string& master_ip, const int master_port, const int worker_port);
+ public:
+  Worker(const std::string& master_ip,
+         const int master_port,
+         const int worker_port);
   ~Worker() {}
   void run();
 
-protected:
+ protected:
   static void *announce(void *arg);
   static void *server(void *arg);
   static void *compute(void *arg);
   static void *pull(void *arg);
   static void *push(void *arg);
 
-protected:
+ protected:
   std::unique_ptr<distrust::ParamServiceClient> param_client_;
 
   // The language model holds all our parameters
@@ -67,7 +69,7 @@ protected:
 
 class WorkerServiceHandler : virtual public distrust::WorkerServiceIf {
 
-public:
+ public:
   WorkerServiceHandler(Worker *worker) : worker_(worker) { }
   ~WorkerServiceHandler() { }
 
@@ -76,7 +78,7 @@ public:
   void stop();
   void reassign(const std::vector<std::string> &shard_paths);
 
-protected:
+ protected:
   Worker *worker_;
 };
 
