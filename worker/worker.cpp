@@ -1,16 +1,14 @@
+#include "Worker.h"
+
 #include <iostream>
 #include <getopt.h>
-#include <pthread.h>
-
-#include "../gen-cpp/ParamService.h"
-#include "LanguageModel.h"
-#include "WorkerServiceHandler.h"
-
 #include <transport/TSocket.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TThreadedServer.h>
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
+
+#include "WorkerServiceHandler.h"
 
 using namespace apache::thrift;
 using namespace apache::thrift::protocol;
@@ -21,110 +19,89 @@ using boost::shared_ptr;
 
 using namespace distrust;
 
-class Worker {
-public:
-  Worker(const std::string& master_ip, const int master_port, const int worker_port) :
-    master_ip_(master_ip),
-    master_port_(master_port),
-    worker_port_(worker_port),
-    server_ready_(false) {
+Worker::Worker(const std::string& master_ip, const int master_port, const int worker_port) :
+  master_ip_(master_ip),
+  master_port_(master_port),
+  worker_port_(worker_port),
+  server_ready_(false) {
 
-    pthread_mutex_init(&lock_, NULL);
-    pthread_cond_init(&server_ready_cond_, NULL);
+  pthread_mutex_init(&lock_, NULL);
+  pthread_cond_init(&server_ready_cond_, NULL);
 
-    shared_ptr<TSocket> socket(new TSocket(master_ip.data(), master_port));
-    shared_ptr<TTransport> transport(new TBufferedTransport(socket));
-    shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
-    param_client_ = std::unique_ptr<ParamServiceClient>(
-      new ParamServiceClient(protocol));
+  shared_ptr<TSocket> socket(new TSocket(master_ip.data(), master_port));
+  shared_ptr<TTransport> transport(new TBufferedTransport(socket));
+  shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+  param_client_ = std::unique_ptr<ParamServiceClient>(
+    new ParamServiceClient(protocol));
 
-    while (true) {
-      try {
-        transport->open();
-        break;
-      } catch (const TException &tx) {
-        std::cerr << "Transport error: " << tx.what() << std::endl;
-      }
-      sleep(1);
+  while (true) {
+    try {
+      transport->open();
+      break;
+    } catch (const TException &tx) {
+      std::cerr << "Transport error: " << tx.what() << std::endl;
     }
-
-    std::cout << "Connected to param server at " << master_ip << ":" << master_port << std::endl;
-  }
-
-  ~Worker() {}
-
-  static void *server(void *arg) {
-    Worker *context = (Worker *) arg;
-    pthread_mutex_lock(&context->lock_);
-    const int worker_port = context->worker_port_;
-    std::cout << "Starting worker on port " << worker_port << std::endl;
-    shared_ptr<WorkerServiceHandler> handler(new WorkerServiceHandler());
-    shared_ptr<TProcessor> processor(new WorkerServiceProcessor(handler));
-    shared_ptr<TServerTransport> serverTransport(new TServerSocket(worker_port));
-    shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
-    shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
-    TThreadedServer server(processor, serverTransport, transportFactory, protocolFactory);
-    context->server_ready_ = true;
-    pthread_cond_signal(&context->server_ready_cond_);
-    pthread_mutex_unlock(&context->lock_);
-    server.serve();
-    return NULL;
-  }
-
-  static void *announce(void *arg) {
-    Worker *context = (Worker *) arg;
-
-    pthread_mutex_lock(&context->lock_);
-    while (!context->server_ready_) {
-      pthread_cond_wait(&context->server_ready_cond_, &context->lock_);
-    }
-    pthread_mutex_unlock(&context->lock_);
-
-    // give the server time to start up
     sleep(1);
-
-    AnnounceResponse resp;
-    context->param_client_->announce(resp, context->worker_port_);
-    context->model_ = std::unique_ptr<LanguageModel>(
-      new LanguageModel(resp.model_info));
-    context->model_->init(resp.params);
-    context->shard_paths_ = resp.shard_paths;
-    context->learn_rate_ = resp.learn_rate;
-
-    std::cout << "Received paths from master:" << std::endl;
-    for (const std::string& path : context->shard_paths_) {
-      std::cout << path << std::endl;
-    }
-
-    return NULL;
   }
 
-  void run() {
-    int server_ret = pthread_create(&server_thread_, NULL, &Worker::server, this);
-    int announce_ret = pthread_create(&announce_thread_, NULL, &Worker::announce, this);
-    pthread_join(server_thread_, NULL);
-    pthread_join(announce_thread_, NULL);
+  std::cout << "Connected to param server at " << master_ip << ":" << master_port << std::endl;
+}
+
+void *
+Worker::server(void *arg) {
+  Worker *context = (Worker *) arg;
+  pthread_mutex_lock(&context->lock_);
+  const int worker_port = context->worker_port_;
+  std::cout << "Starting worker on port " << worker_port << std::endl;
+  shared_ptr<WorkerServiceHandler> handler(new WorkerServiceHandler());
+  shared_ptr<TProcessor> processor(new WorkerServiceProcessor(handler));
+  shared_ptr<TServerTransport> serverTransport(new TServerSocket(worker_port));
+  shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
+  shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
+  TThreadedServer server(processor, serverTransport, transportFactory, protocolFactory);
+  context->server_ready_ = true;
+  pthread_cond_signal(&context->server_ready_cond_);
+  pthread_mutex_unlock(&context->lock_);
+  server.serve();
+  return NULL;
+}
+
+void *
+Worker::announce(void *arg) {
+  Worker *context = (Worker *) arg;
+
+  pthread_mutex_lock(&context->lock_);
+  while (!context->server_ready_) {
+    pthread_cond_wait(&context->server_ready_cond_, &context->lock_);
+  }
+  pthread_mutex_unlock(&context->lock_);
+
+  // give the server time to start up
+  sleep(1);
+
+  AnnounceResponse resp;
+  context->param_client_->announce(resp, context->worker_port_);
+  context->model_ = std::unique_ptr<LanguageModel>(
+    new LanguageModel(resp.model_info));
+  context->model_->init(resp.params);
+  context->shard_paths_ = resp.shard_paths;
+  context->learn_rate_ = resp.learn_rate;
+
+  std::cout << "Received paths from master:" << std::endl;
+  for (const std::string& path : context->shard_paths_) {
+    std::cout << path << std::endl;
   }
 
-protected:
-  std::unique_ptr<ParamServiceClient> param_client_;
-  std::unique_ptr<LanguageModel> model_;
+  return NULL;
+}
 
-  // Paths to training data
-  std::vector<std::string> shard_paths_;
-
-  // Learning rate
-  double learn_rate_;
-
-  pthread_t server_thread_, announce_thread_, pull_thread_, push_thread_;
-  std::string master_ip_;
-  int master_port_, worker_port_;
-
-  // server/client synchronization
-  pthread_mutex_t lock_;
-  bool server_ready_;
-  pthread_cond_t server_ready_cond_;
-};
+void
+Worker::run() {
+  int server_ret = pthread_create(&server_thread_, NULL, &Worker::server, this);
+  int announce_ret = pthread_create(&announce_thread_, NULL, &Worker::announce, this);
+  pthread_join(server_thread_, NULL);
+  pthread_join(announce_thread_, NULL);
+}
 
 void
 usage() {

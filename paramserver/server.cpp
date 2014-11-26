@@ -48,6 +48,7 @@ class ParamServiceHandler : virtual public ParamServiceIf {
     }
     std::cout << "Connected to " << worker_ip_ << ":" << worker_port << std::endl;
 
+    // Test
     worker_client_->stop();
 
     // Return parameters
