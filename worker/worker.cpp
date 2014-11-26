@@ -8,8 +8,6 @@
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
 
-#include "WorkerServiceHandler.h"
-
 using namespace apache::thrift;
 using namespace apache::thrift::protocol;
 using namespace apache::thrift::transport;
@@ -23,10 +21,16 @@ Worker::Worker(const std::string& master_ip, const int master_port, const int wo
   master_ip_(master_ip),
   master_port_(master_port),
   worker_port_(worker_port),
-  server_ready_(false) {
+  server_ready_(false),
+  stop_(true) {
 
-  pthread_mutex_init(&lock_, NULL);
+  pthread_mutex_init(&model_lock_, NULL);
+  pthread_mutex_init(&stop_lock_, NULL);
+  pthread_mutex_init(&shard_paths_lock_, NULL);
+  pthread_mutex_init(&completed_shards_lock_, NULL);
+  pthread_mutex_init(&server_ready_lock_, NULL);
   pthread_cond_init(&server_ready_cond_, NULL);
+  pthread_cond_init(&stop_cond_, NULL);
 
   shared_ptr<TSocket> socket(new TSocket(master_ip.data(), master_port));
   shared_ptr<TTransport> transport(new TBufferedTransport(socket));
@@ -50,10 +54,10 @@ Worker::Worker(const std::string& master_ip, const int master_port, const int wo
 void *
 Worker::server(void *arg) {
   Worker *context = (Worker *) arg;
-  pthread_mutex_lock(&context->lock_);
+  pthread_mutex_lock(&context->server_ready_lock_);
   const int worker_port = context->worker_port_;
   std::cout << "Starting worker on port " << worker_port << std::endl;
-  shared_ptr<WorkerServiceHandler> handler(new WorkerServiceHandler());
+  shared_ptr<WorkerServiceHandler> handler(new WorkerServiceHandler(context));
   shared_ptr<TProcessor> processor(new WorkerServiceProcessor(handler));
   shared_ptr<TServerTransport> serverTransport(new TServerSocket(worker_port));
   shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
@@ -61,7 +65,7 @@ Worker::server(void *arg) {
   TThreadedServer server(processor, serverTransport, transportFactory, protocolFactory);
   context->server_ready_ = true;
   pthread_cond_signal(&context->server_ready_cond_);
-  pthread_mutex_unlock(&context->lock_);
+  pthread_mutex_unlock(&context->server_ready_lock_);
   server.serve();
   return NULL;
 }
@@ -70,11 +74,11 @@ void *
 Worker::announce(void *arg) {
   Worker *context = (Worker *) arg;
 
-  pthread_mutex_lock(&context->lock_);
+  pthread_mutex_lock(&context->server_ready_lock_);
   while (!context->server_ready_) {
-    pthread_cond_wait(&context->server_ready_cond_, &context->lock_);
+    pthread_cond_wait(&context->server_ready_cond_, &context->server_ready_lock_);
   }
-  pthread_mutex_unlock(&context->lock_);
+  pthread_mutex_unlock(&context->server_ready_lock_);
 
   // give the server time to start up
   sleep(1);
@@ -95,12 +99,39 @@ Worker::announce(void *arg) {
   return NULL;
 }
 
+void *
+Worker::compute(void *arg) {
+  Worker *context = (Worker *) arg;
+
+  return NULL;
+}
+
+void *
+Worker::push(void *arg) {
+  Worker *context = (Worker *) arg;
+
+  return NULL;
+}
+
+void *
+Worker::pull(void *arg) {
+  Worker *context = (Worker *) arg;
+
+  return NULL;
+}
+
 void
 Worker::run() {
   int server_ret = pthread_create(&server_thread_, NULL, &Worker::server, this);
   int announce_ret = pthread_create(&announce_thread_, NULL, &Worker::announce, this);
+  int compute_ret = pthread_create(&compute_thread_, NULL, &Worker::compute, this);
+  int push_ret = pthread_create(&push_thread_, NULL, &Worker::push, this);
+  int pull_ret = pthread_create(&pull_thread_, NULL, &Worker::pull, this);
   pthread_join(server_thread_, NULL);
   pthread_join(announce_thread_, NULL);
+  pthread_join(compute_thread_, NULL);
+  pthread_join(push_thread_, NULL);
+  pthread_join(pull_thread_, NULL);
 }
 
 void
