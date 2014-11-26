@@ -11,20 +11,23 @@ struct ModelInfo {
     // Language model context window size
     1: i32 window_size,
 
-    // Size of vocabulary
-    2: i32 vocab_size,
-
-    // Vocabulary index of start-of-sentence token
-    3: i32 start_token_index,
-
-    // Vocabulary index of end-of-sentence token
-    4: i32 end_token_index,
-
     // Word vector dimension
-    5: i32 wordvec_dim,
+    2: i32 wordvec_dim,
 
     // Hidden layer dimension
-    6: i32 hidden_dim,
+    3: i32 hidden_dim,
+
+    // Vocabulary index of start-of-sentence token
+    4: i32 start_token_index,
+
+    // Vocabulary index of end-of-sentence token
+    5: i32 end_token_index,
+
+    // Vocabulary index of unknown-word token
+    6: i32 unk_token_index,
+
+    // Vocabulary
+    7: list<string> vocab,
 }
 
 /**

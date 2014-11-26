@@ -21,9 +21,9 @@ private:
   int window_size_;
   int wordvec_dim_;
   int hidden_dim_;
-  int vocab_size_;
   int start_token_index_;
   int end_token_index_;
+  int unk_token_index_;
 
   // Parameters
   Eigen::MatrixXd wordvecs_;

@@ -17,20 +17,30 @@ class ParamServer {
  friend class ParamServiceHandler;
 
  public:
-  ParamServer(const int32_t port, const std::string &raft_cluster);
+  ParamServer(
+    const int32_t port,
+    const std::string &raft_cluster,
+    const std::string &data_dir);
   ~ParamServer() { }
   void run();
 
  protected:
   void add_worker(const std::string &ip, const int32_t port);
+  void read_vocab(const std::string &path);
   static void *server(void *);
 
  protected:
-  int port_;
+  int32_t port_;
   pthread_t server_thread_;
   LogCabin::Client::Cluster cluster_;
   std::unordered_map<std::string, std::unique_ptr<WorkerServiceClient>>
     worker_clients_;
+
+  int32_t start_token_index_;
+  int32_t end_token_index_;
+  int32_t unk_token_index_;
+  std::vector<std::string> vocab_;
+  std::vector<std::string> shard_paths_;
 };
 
 class ParamServiceHandler : virtual public distrust::ParamServiceIf {

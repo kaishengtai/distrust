@@ -1,9 +1,11 @@
 #include "Server.h"
 
 #include <iostream>
+#include <fstream>
 #include <getopt.h>
 #include <sstream>
 
+#include <boost/filesystem.hpp>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TThreadedServer.h>
 #include <thrift/transport/TServerSocket.h>
@@ -13,6 +15,7 @@ using namespace apache::thrift;
 using namespace apache::thrift::protocol;
 using namespace apache::thrift::transport;
 using namespace apache::thrift::server;
+namespace fs = boost::filesystem;
 
 using LogCabin::Client::Cluster;
 using LogCabin::Client::Tree;
@@ -28,9 +31,35 @@ get_worker_key(const std::string &ip, const int32_t port) {
   return ss.str();
 }
 
-ParamServer::ParamServer(const int32_t port, const std::string &raft_cluster) :
+ParamServer::ParamServer(
+  const int32_t port,
+  const std::string &raft_cluster,
+  const std::string &data_dir) :
     port_(port),
-    cluster_(raft_cluster) { }
+    cluster_(raft_cluster) { 
+
+  if (!fs::exists(data_dir) || !fs::is_directory(data_dir)) {
+    throw std::invalid_argument("Invalid data directory: " + data_dir);
+  }
+
+  // read vocabulary
+  fs::path vocab_file("vocab.txt");
+  std::string vocab_path = (data_dir / vocab_file).native();
+  if (!fs::exists(vocab_path)) {
+    throw std::invalid_argument("No vocab.txt in data directory: " + data_dir);
+  }
+  read_vocab(vocab_path);
+
+  // get shard paths from data directory
+  fs::directory_iterator end_iter;
+  for (fs::directory_iterator dir_iter(data_dir); dir_iter != end_iter; dir_iter++) {
+    if (fs::is_regular_file(dir_iter->status())) {
+      std::string path = dir_iter->path().native();
+      if (path == vocab_path) continue;
+      shard_paths_.push_back(path);
+    }
+  }
+}
 
 void 
 ParamServer::run() {
@@ -57,6 +86,53 @@ ParamServer::add_worker(const std::string &ip, const int32_t port) {
     sleep(1);
   }
   std::cout << "Connected to " << ip << ":" << port << std::endl;
+}
+
+void
+ParamServer::read_vocab(const std::string &path) {
+  std::cout << "Reading vocabulary from " << path << std::endl;
+  std::ifstream file(path);
+  std::string word;
+  std::string START("<s>");
+  std::string END("</s>");
+  std::string UNK("<unk>");
+
+  int i = 0;
+  int start_idx = -1;
+  int end_idx = -1;
+  int unk_idx = -1;
+  while (file >> word) {
+    if (word == START) {
+      start_idx = i;
+    } else if (word == END) {
+      end_idx = i;
+    } else if (word == UNK) {
+      unk_idx = i;
+    }
+
+    vocab_.push_back(word);
+    i++;
+  }
+
+  if (start_idx == -1) {
+    vocab_.push_back(START);
+    start_idx = i++;
+  }
+
+  if (end_idx == -1) {
+    vocab_.push_back(END);
+    end_idx = i++;
+  }
+
+  if (unk_idx == -1) {
+    vocab_.push_back(UNK);
+    unk_idx = i++;
+  }
+
+  start_token_index_ = start_idx;
+  end_token_index_ = end_idx;
+  unk_token_index_ = unk_idx;
+  file.close();
 }
 
 void *
@@ -91,11 +167,12 @@ ParamServiceHandler::announce(
   // Return parameters
   // TODO: replace hardcoded values
   _return.model_info.window_size = 5;
-  _return.model_info.vocab_size = 40000;
-  _return.model_info.start_token_index = 1;
-  _return.model_info.end_token_index = 2;
   _return.model_info.wordvec_dim = 128;
   _return.model_info.hidden_dim = 256;
+  _return.model_info.start_token_index = server_->start_token_index_;
+  _return.model_info.end_token_index = server_->end_token_index_;
+  _return.model_info.unk_token_index = server_->unk_token_index_;
+  _return.model_info.vocab = server_->vocab_;
 
   _return.params.wordvec_weights.push_back(1.0);
   _return.params.input_hidden_weights.push_back(1.0);
@@ -198,7 +275,7 @@ int main(int argc, char **argv) {
   
   printf("paramserver: using LogCabin cluster: %s\n", options.cluster.c_str());
   printf("paramserver: start serving on port %d\n", options.port);
-  ParamServer param_server(options.port, options.cluster);
+  ParamServer param_server(options.port, options.cluster, options.data_dir);
   param_server.run();
   return 0;
 }

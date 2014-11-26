@@ -13,7 +13,12 @@ CXXFLAGS := -Wall \
 
 LDFLAGS := -L/usr/local/lib -L../logcabin/build
 
-LIBS := -lthrift -llogcabin -lprotobuf -lpthread
+LIBS := -lboost_system \
+		-lboost_filesystem \
+		-lthrift \
+		-llogcabin \
+		-lprotobuf \
+		-lpthread
 
 THRIFT_SRC := \
 	gen-cpp/WorkerService.cpp \
