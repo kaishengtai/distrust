@@ -1,6 +1,6 @@
 WORKER_SRC := worker/Worker.cpp \
 			  worker/WorkerServiceHandler.cpp \
-			  worker/LanguageModel.cpp
+			  LanguageModel.cpp
 
 WORKER_OBJ := $(WORKER_SRC:.cpp=.o)
 

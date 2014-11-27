@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <transport/TSocket.h>
 
+#include "../LanguageModel.h"
 #include "distrust/gen-cpp/ParamService.h"
 #include "distrust/gen-cpp/WorkerService.h"
 #include "logcabin/Client/Client.h"
@@ -18,6 +19,9 @@ class ParamServer {
 
  public:
   ParamServer(
+    const int32_t window_size,
+    const int32_t wordvec_dim,
+    const int32_t hidden_dim,
     const int32_t port,
     const std::string &raft_cluster,
     const std::string &data_dir);
@@ -31,18 +35,23 @@ class ParamServer {
   static void *heartbeat(void *);
 
  protected:
+  // ParamServer port
   int32_t port_;
+
+  // Raft cluster
+  LogCabin::Client::Cluster cluster_;
+
   pthread_t server_thread_;
   std::unordered_map<std::string, pthread_t> heartbeat_threads_;
-  LogCabin::Client::Cluster cluster_;
   std::unordered_map<std::string, std::unique_ptr<WorkerServiceClient>>
     worker_clients_;
 
-  int32_t start_token_index_;
-  int32_t end_token_index_;
-  int32_t unk_token_index_;
-  std::vector<std::string> vocab_;
+  // Paths to data shards
   std::vector<std::string> shard_paths_;
+
+  // Language model
+  distrust::ModelInfo model_info_;
+  std::unique_ptr<LanguageModel> model_;
 };
 
 class ParamServiceHandler : virtual public distrust::ParamServiceIf {
@@ -52,7 +61,7 @@ class ParamServiceHandler : virtual public distrust::ParamServiceIf {
       worker_ip_(worker_ip) { }
 
   void announce(distrust::AnnounceResponse &_return, const int32_t worker_port);
-  void push_update(const distrust::Params &params);
+  void push_update(const distrust::ParamUpdate &update);
   void pull_params(distrust::Params &_return);
 
  protected:

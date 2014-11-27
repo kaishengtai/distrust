@@ -90,10 +90,12 @@ Worker::announce(void *arg) {
   AnnounceResponse resp;
   context->param_client_->announce(resp, context->worker_port_);
 
+  // Initialize model parameters.
+  // Takes ownership of memory holding parameters.
   pthread_mutex_lock(&context->model_lock_);
   context->model_ = std::unique_ptr<LanguageModel>(
     new LanguageModel(resp.model_info));
-  context->model_->init(resp.params);
+  context->model_->set_params(resp.params);
   pthread_mutex_unlock(&context->model_lock_);
 
   pthread_mutex_lock(&context->shard_paths_lock_);
@@ -116,14 +118,15 @@ Worker::compute(void *arg) {
   while (true) {
     pthread_mutex_lock(&context->stop_lock_);
     while (context->stop_) {
+      std::cout << "Stopped" << std::endl;
       pthread_cond_wait(&context->stop_cond_, &context->stop_lock_);
+      std::cout << "Started" << std::endl;
     }
+    pthread_mutex_unlock(&context->stop_lock_);
 
     // Perform computation on a batch
     std::cout << "Computing on batch" << std::endl;
     sleep(4);
-
-    pthread_mutex_unlock(&context->stop_lock_);
   }
 
   return NULL;

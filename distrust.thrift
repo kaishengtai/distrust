@@ -34,11 +34,19 @@ struct ModelInfo {
  * Model parameters as flat vectors of doubles.
  */
 struct Params {
-    1: list<double> wordvec_weights,
-    2: list<double> input_hidden_weights,
-    3: list<double> input_hidden_biases,
-    4: list<double> hidden_output_weights,
-    5: list<double> hidden_output_biases,
+    1: list<list<double>> wordvec_w,
+    2: list<list<double>> input_hidden_w,
+    3: list<double> input_hidden_b,
+    4: list<double> hidden_output_w,
+    5: list<double> hidden_output_b,
+}
+
+struct ParamUpdate {
+    1: map<i32, list<double>> wordvec_w,
+    2: list<list<double>> input_hidden_w,
+    3: list<double> input_hidden_b,
+    4: list<double> hidden_output_w,
+    5: list<double> hidden_output_b,
 }
 
 struct AnnounceResponse {
@@ -53,7 +61,7 @@ service ParamService {
     AnnounceResponse announce(1:i32 worker_port),
 
     // Push a parameter update to the master
-    void push_update(1:Params params),
+    void push_update(1:ParamUpdate update),
 
     // Request up-to-date parameters from the master
     Params pull_params(),

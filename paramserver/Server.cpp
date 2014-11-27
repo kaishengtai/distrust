@@ -38,6 +38,9 @@ struct HeartbeatConfig {
 };
 
 ParamServer::ParamServer(
+  const int32_t window_size,
+  const int32_t wordvec_dim,
+  const int32_t hidden_dim,
   const int32_t port,
   const std::string &raft_cluster,
   const std::string &data_dir) :
@@ -65,6 +68,13 @@ ParamServer::ParamServer(
       shard_paths_.push_back(path);
     }
   }
+
+  // initialize parameters
+  model_info_.window_size = window_size;
+  model_info_.wordvec_dim = wordvec_dim;
+  model_info_.hidden_dim = hidden_dim;
+  model_ = std::unique_ptr<LanguageModel>(new LanguageModel(model_info_));
+  model_->random_init();
 }
 
 void 
@@ -126,28 +136,28 @@ ParamServer::read_vocab(const std::string &path) {
       unk_idx = i;
     }
 
-    vocab_.push_back(word);
+    model_info_.vocab.push_back(word);
     i++;
   }
 
   if (start_idx == -1) {
-    vocab_.push_back(START);
+    model_info_.vocab.push_back(START);
     start_idx = i++;
   }
 
   if (end_idx == -1) {
-    vocab_.push_back(END);
+    model_info_.vocab.push_back(END);
     end_idx = i++;
   }
 
   if (unk_idx == -1) {
-    vocab_.push_back(UNK);
+    model_info_.vocab.push_back(UNK);
     unk_idx = i++;
   }
 
-  start_token_index_ = start_idx;
-  end_token_index_ = end_idx;
-  unk_token_index_ = unk_idx;
+  model_info_.start_token_index = start_idx;
+  model_info_.end_token_index = end_idx;
+  model_info_.unk_token_index = unk_idx;
   file.close();
 }
 
@@ -215,34 +225,25 @@ ParamServiceHandler::announce(
   server_->add_worker(worker_ip_, worker_port);
 
   // Return parameters
-  // TODO: replace hardcoded values
-  _return.model_info.window_size = 5;
-  _return.model_info.wordvec_dim = 128;
-  _return.model_info.hidden_dim = 256;
-  _return.model_info.start_token_index = server_->start_token_index_;
-  _return.model_info.end_token_index = server_->end_token_index_;
-  _return.model_info.unk_token_index = server_->unk_token_index_;
-  _return.model_info.vocab = server_->vocab_;
+  _return.model_info = server_->model_info_;
+  _return.params.wordvec_w.push_back(std::vector<double>(1.0));
+  _return.params.input_hidden_w.push_back(std::vector<double>(1.0));
+  _return.params.input_hidden_b.push_back(1.0);
+  _return.params.hidden_output_w.push_back(1.0);
+  _return.params.hidden_output_b.push_back(1.0);
 
-  _return.params.wordvec_weights.push_back(1.0);
-  _return.params.input_hidden_weights.push_back(1.0);
-  _return.params.input_hidden_biases.push_back(1.0);
-  _return.params.hidden_output_weights.push_back(1.0);
-  _return.params.hidden_output_biases.push_back(1.0);
-
-  _return.shard_paths.push_back("/foo/bar/");
-  _return.shard_paths.push_back("/foo/baz/");
+  _return.shard_paths = server_->shard_paths_;
 
   _return.learn_rate = 0.1;
 }
 
 void
-ParamServiceHandler::push_update(const Params& params) {
+ParamServiceHandler::push_update(const ParamUpdate &update) {
   printf("push_update\n");
 }
 
 void
-ParamServiceHandler::pull_params(Params& _return) {
+ParamServiceHandler::pull_params(Params &_return) {
   printf("pull_params\n");
 }
 
@@ -254,18 +255,24 @@ class OptionParser {
   OptionParser(int& argc, char**& argv)
       : argc_(argc),
         argv_(argv),
-        cluster("logcabin:61023"),
-        port(0) {
+        window_size(3),
+        wordvec_dim(50),
+        hidden_dim(200),
+        port(8000),
+        cluster("logcabin:61023") {
     static struct option longOptions[] = {
       {"cluster",  required_argument, NULL, 'c'},
       {"port", required_argument, 0, 'p'},
       {"data", required_argument, 0, 'd'},
+      {"window", required_argument, 0, 'w'},
+      {"wordvec", required_argument, 0, 'v'},
+      {"hidden", required_argument, 0, 'H'},
       {"help",  no_argument, NULL, 'h'},
       {0, 0, 0, 0}
     };
 
     int c;
-    while ((c = getopt_long(argc, argv, "c:p:d:h", longOptions, NULL)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:p:d:w:v:H:h", longOptions, NULL)) != -1) {
       switch (c) {
         case 'c':
           cluster = optarg;
@@ -275,6 +282,15 @@ class OptionParser {
           break;
         case 'd':
           data_dir = optarg;
+          break;
+        case 'w':
+          window_size = atoi(optarg);
+          break;
+        case 'v':
+          wordvec_dim = atoi(optarg);
+          break;
+        case 'H':
+          hidden_dim = atoi(optarg);
           break;
         case 'h':
           usage();
@@ -299,14 +315,21 @@ class OptionParser {
       std::cout << "  -d, --data <dir> "
                 << "The path to the directory that contains the dataset "
                 << "(assumed to contain vocabulary in vocab.txt)" << std::endl;
+      std::cout << "  -w, --window <dim>" << std::endl;
+      std::cout << "  -v, --wordvec <dim>" << std::endl;
+      std::cout << "  -H, --hidden <dim>" << std::endl;
       std::cout << "  -h, --help              "
                 << "Print this usage information" << std::endl;
   }
 
   int& argc_;
   char**& argv_;
-  std::string cluster;
+
+  int window_size;
+  int wordvec_dim;
+  int hidden_dim;
   int port;
+  std::string cluster;
   std::string data_dir;
 };
 
@@ -325,7 +348,13 @@ int main(int argc, char **argv) {
   
   printf("paramserver: using LogCabin cluster: %s\n", options.cluster.c_str());
   printf("paramserver: start serving on port %d\n", options.port);
-  ParamServer param_server(options.port, options.cluster, options.data_dir);
+  ParamServer param_server(
+    options.window_size,
+    options.wordvec_dim,
+    options.hidden_dim,
+    options.port,
+    options.cluster,
+    options.data_dir);
   param_server.run();
   return 0;
 }

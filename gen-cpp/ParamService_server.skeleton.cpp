@@ -27,7 +27,7 @@ class ParamServiceHandler : virtual public ParamServiceIf {
     printf("announce\n");
   }
 
-  void push_update(const Params& params) {
+  void push_update(const ParamUpdate& update) {
     // Your implementation goes here
     printf("push_update\n");
   }
