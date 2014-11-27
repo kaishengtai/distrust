@@ -28,10 +28,12 @@ class ParamServer {
   void add_worker(const std::string &ip, const int32_t port);
   void read_vocab(const std::string &path);
   static void *server(void *);
+  static void *heartbeat(void *);
 
  protected:
   int32_t port_;
   pthread_t server_thread_;
+  std::unordered_map<std::string, pthread_t> heartbeat_threads_;
   LogCabin::Client::Cluster cluster_;
   std::unordered_map<std::string, std::unique_ptr<WorkerServiceClient>>
     worker_clients_;
@@ -65,8 +67,7 @@ class ParamServiceHandlerFactory : virtual public distrust::ParamServiceIfFactor
   // This can be used to open a reverse connection from paramserver to worker
   ParamServiceHandler* getHandler(const TConnectionInfo& connInfo) {
     boost::shared_ptr<TSocket> socket = 
-      boost::dynamic_pointer_cast<TSocket>(
-        connInfo.transport);
+      boost::dynamic_pointer_cast<TSocket>(connInfo.transport);
     return new ParamServiceHandler(server_, socket->getPeerAddress());
   }
 

@@ -31,6 +31,12 @@ get_worker_key(const std::string &ip, const int32_t port) {
   return ss.str();
 }
 
+struct HeartbeatConfig {
+  ParamServer *server;
+  std::string ip;
+  int32_t port;
+};
+
 ParamServer::ParamServer(
   const int32_t port,
   const std::string &raft_cluster,
@@ -72,7 +78,8 @@ ParamServer::add_worker(const std::string &ip, const int32_t port) {
   shared_ptr<TSocket> socket(new TSocket(ip, port));
   shared_ptr<TTransport> transport(new TBufferedTransport(socket));
   shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
-  worker_clients_[get_worker_key(ip, port)] =
+  std::string worker_key = get_worker_key(ip, port);
+  worker_clients_[worker_key] =
     std::unique_ptr<WorkerServiceClient>(new WorkerServiceClient(protocol));
 
   // Make the connection
@@ -86,6 +93,15 @@ ParamServer::add_worker(const std::string &ip, const int32_t port) {
     sleep(1);
   }
   std::cout << "Connected to " << ip << ":" << port << std::endl;
+  
+  // Spin up a watcher thread to periodically monitor heartbeats.
+  HeartbeatConfig *heartbeat_config = new HeartbeatConfig;
+  heartbeat_config->server = this;
+  heartbeat_config->ip = ip;
+  heartbeat_config->port = port;
+
+  pthread_create(&heartbeat_threads_[worker_key], NULL,
+                 &ParamServer::heartbeat, heartbeat_config);
 }
 
 void
@@ -152,6 +168,40 @@ ParamServer::server(void * arg) {
   TThreadedServer server(
     processorFactory, serverTransport, transportFactory, protocolFactory);
   server.serve();
+  return NULL;
+}
+
+void *
+ParamServer::heartbeat(void * arg) {
+  std::unique_ptr<HeartbeatConfig> heartbeat_config((HeartbeatConfig *)arg);
+  std::string worker_key = get_worker_key(heartbeat_config->ip,
+                                          heartbeat_config->port);
+  WorkerServiceClient *worker_client =
+      heartbeat_config->server->worker_clients_[worker_key].get();
+
+  std::cout << "Starting heartbeat monitoring thread for worker "
+            << heartbeat_config->ip << ":" << heartbeat_config->port
+            << std::endl;
+
+  HBResponse hbresponse;
+  while (true) {
+    // Ping
+    try {
+      worker_client->heartbeat(hbresponse);
+    } catch (TException &tx) {
+      std::cout << "ERROR: " << tx.what() << std::endl;
+      std::cout << "Worker " << heartbeat_config->ip << ":"
+                << heartbeat_config->port << " did not return heartbeat."
+                << std::endl;
+      // Break out to try
+      break;
+    }
+
+    sleep(5);
+  }
+  
+  // Handle stopping worker, reassigning work to other workers, etc.
+  std::cout << "Handling reassignment" << std::endl;
   return NULL;
 }
 
