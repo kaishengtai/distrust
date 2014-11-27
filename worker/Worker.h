@@ -5,7 +5,7 @@
 
 #include "../gen-cpp/WorkerService.h"
 #include "../gen-cpp/ParamService.h"
-#include "LanguageModel.h"
+#include "../LanguageModel.h"
 
 #define WORKER_DEFAULT_PORT 9090
 

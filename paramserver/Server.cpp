@@ -226,15 +226,9 @@ ParamServiceHandler::announce(
 
   // Return parameters
   _return.model_info = server_->model_info_;
-  _return.params.wordvec_w.push_back(std::vector<double>(1.0));
-  _return.params.input_hidden_w.push_back(std::vector<double>(1.0));
-  _return.params.input_hidden_b.push_back(1.0);
-  _return.params.hidden_output_w.push_back(1.0);
-  _return.params.hidden_output_b.push_back(1.0);
-
   _return.shard_paths = server_->shard_paths_;
-
   _return.learn_rate = 0.1;
+  server_->model_->get_params(_return.params);
 }
 
 void

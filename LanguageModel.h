@@ -8,34 +8,44 @@
 using Eigen::Dynamic;
 using Eigen::RowMajor;
 using Eigen::Matrix;
-using Eigen::MatrixXd;
-using Eigen::VectorXd;
 using Eigen::Map;
 
 typedef Map<Matrix<double, Dynamic, Dynamic, RowMajor>> Matrix_t;
 typedef Map<Matrix<double, Dynamic, 1>> Vector_t;
 
 class LanguageModel {
-public:
+ public:
   LanguageModel(const distrust::ModelInfo &model_info);
   ~LanguageModel() {};
 
   void random_init();
   void set_params(distrust::Params &params);
-  VectorXd forward(const VectorXd &input);
+  void update_params(const distrust::ParamUpdate &update);
+  void get_params(distrust::Params &ret);
+  std::vector<double> forward(const std::vector<uint32_t> &input);
   //Eigen::MatrixXd forward(Eigen::MatrixXd input);
-  distrust::Params backward(const VectorXd &input, const int32_t target);
+  void backward(distrust::Params &ret, const std::vector<uint32_t> &input, const uint32_t target);
   //distrust::Params backward(Eigen::MatrixXd input);
 
-private:
+ protected:
+  inline double sample();
+  void wrap_buffers();
+  Eigen::VectorXd tanh(const Eigen::VectorXd &v);
+  double logZ(const Eigen::VectorXd &v);
+
+ protected:
   // Model information
-  int32_t window_size_;
-  int32_t wordvec_dim_;
-  int32_t hidden_dim_;
-  int32_t start_token_index_;
-  int32_t end_token_index_;
-  int32_t unk_token_index_;
-  int32_t vocab_size_; 
+  uint32_t window_size_;
+  uint32_t wordvec_dim_;
+  uint32_t hidden_dim_;
+  uint32_t start_token_index_;
+  uint32_t end_token_index_;
+  uint32_t unk_token_index_;
+  uint32_t vocab_size_; 
+
+  // Source of randomness
+  std::uniform_real_distribution<double> unif_;
+  std::default_random_engine re_;
 
   // Parameters
   std::vector<std::vector<double>> wordvec_w_buf_;
@@ -48,6 +58,11 @@ private:
   std::unique_ptr<Vector_t> input_hidden_b_;
   std::unique_ptr<Matrix_t> hidden_output_w_;
   std::unique_ptr<Vector_t> hidden_output_b_;
+
+  // Cached activations
+  Eigen::VectorXd hidden_, hidden_tanh_;
+  Eigen::VectorXd output_, output_normed_;
+  double logZ_;
 };
 
 #endif

@@ -126,6 +126,11 @@ Worker::compute(void *arg) {
 
     // Perform computation on a batch
     std::cout << "Computing on batch" << std::endl;
+    std::vector<uint32_t> input;
+    input.push_back(0);
+    input.push_back(1);
+    input.push_back(2);
+    context->model_->forward(input);
     sleep(4);
   }
 
