@@ -1,4 +1,5 @@
 INCDIRS = -I/usr/local/include/thrift \
+	      -I/usr/include/eigen3 \
 		  -I..
 
 CXXFLAGS := -Wall \
