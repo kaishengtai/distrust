@@ -16,6 +16,19 @@ LanguageModel::LanguageModel(const ModelInfo &model_info) :
   end_token_index_ = model_info.end_token_index;
   unk_token_index_ = model_info.unk_token_index;
   vocab_size_ = model_info.vocab.size();
+
+  wordvec_w_.reserve(vocab_size_);
+  wordvec_w_buf_.reserve(vocab_size_);
+  input_hidden_w_.reserve(window_size_);
+  input_hidden_w_buf_.reserve(window_size_);
+
+  for (unsigned int i = 0; i < window_size_; i++) {
+    input_hidden_w_grad_.push_back(Matrix_t(hidden_dim_, wordvec_dim_));
+  }
+  input_hidden_b_grad_ = Vector_t(hidden_dim_);
+  hidden_output_w_grad_ = Matrix_t(vocab_size_, hidden_dim_);
+  hidden_output_b_grad_ = Vector_t(vocab_size_);
+  zero_grad_params();
 }
 
 double
@@ -25,21 +38,27 @@ LanguageModel::sample() {
 
 void
 LanguageModel::wrap_buffers() {
+  wordvec_w_.clear();
   for (unsigned int i = 0; i < vocab_size_; i++) {
-    wordvec_w_.push_back(Vector_t(&wordvec_w_buf_[i][0], wordvec_dim_));
+    wordvec_w_.push_back(Map<Vector_t>(&wordvec_w_buf_[i][0], wordvec_dim_));
   } 
 
+  input_hidden_w_.clear();
   for (unsigned int i = 0; i < window_size_; i++) {
-    input_hidden_w_.push_back(Matrix_t(&input_hidden_w_buf_[i][0], hidden_dim_, wordvec_dim_));
+    input_hidden_w_.push_back(Map<Matrix_t>(&input_hidden_w_buf_[i][0], hidden_dim_, wordvec_dim_));
   }
 
-  input_hidden_b_ = std::unique_ptr<Vector_t>(new Vector_t(&input_hidden_b_buf_[0], hidden_dim_));
-  hidden_output_w_ = std::unique_ptr<Matrix_t>(new Matrix_t(&hidden_output_w_buf_[0], vocab_size_, hidden_dim_));
-  hidden_output_b_ = std::unique_ptr<Vector_t>(new Vector_t(&hidden_output_b_buf_[0], vocab_size_));
+  input_hidden_b_ = std::unique_ptr<Map<Vector_t>>(
+    new Map<Vector_t>(&input_hidden_b_buf_[0], hidden_dim_));
+  hidden_output_w_ = std::unique_ptr<Map<Matrix_t>>(
+    new Map<Matrix_t>(&hidden_output_w_buf_[0], vocab_size_, hidden_dim_));
+  hidden_output_b_ = std::unique_ptr<Map<Vector_t>>(
+    new Map<Vector_t>(&hidden_output_b_buf_[0], vocab_size_));
 }
 
 void
 LanguageModel::random_init() {
+  wordvec_w_buf_.clear();
   for (unsigned int i = 0; i < vocab_size_; i++) {
     wordvec_w_buf_.push_back(std::vector<double>(wordvec_dim_));
     for (unsigned int j = 0; j < wordvec_dim_; j++) {
@@ -47,6 +66,7 @@ LanguageModel::random_init() {
     }
   }
 
+  input_hidden_w_buf_.clear();
   for (unsigned int i = 0; i < window_size_; i++) {
     input_hidden_w_buf_.push_back(std::vector<double>(hidden_dim_ * wordvec_dim_));
     for (unsigned int j = 0; j < hidden_dim_ * wordvec_dim_; j++) {
@@ -72,7 +92,30 @@ LanguageModel::set_params(Params &params) {
 
 void
 LanguageModel::update_params(const ParamUpdate &update) {
+  for (auto itr = update.wordvec_w.begin(); itr != update.wordvec_w.end(); itr++) {
+    uint32_t idx = itr->first;
+    for (unsigned int i = 0; i < wordvec_dim_; i++) {
+      wordvec_w_buf_[idx][i] += itr->second[i];
+    }
+  }
 
+  for (unsigned int i = 0; i < window_size_; i++) {
+    for (unsigned int j = 0; j < wordvec_dim_ * hidden_dim_; j++) {
+      input_hidden_w_buf_[i][j] += update.input_hidden_w[i][j];
+    }
+  }
+
+  for (unsigned int i = 0; i < hidden_dim_; i++) {
+    input_hidden_b_buf_[i] += update.input_hidden_b[i];
+  }
+
+  for (unsigned int i = 0; i < hidden_dim_ * vocab_size_; i++) {
+    hidden_output_w_buf_[i] += update.hidden_output_w[i];
+  }
+
+  for (unsigned int i = 0; i < vocab_size_; i++) {
+    hidden_output_b_buf_[i] += update.hidden_output_b[i];
+  }
 }
 
 void
@@ -110,18 +153,51 @@ LanguageModel::forward(const std::vector<uint32_t> &input) {
   logZ_ = logZ(output_);
   output_normed_ = (output_.array() - logZ_).matrix();
 
-  std::vector<double> result(vocab_size_);
-  for (unsigned int i = 0; i < vocab_size_; i++) {
-    result[i] = output_normed_(i);
-  }
-  return result;
+  double *ptr = output_normed_.data();
+  return std::vector<double>(ptr, ptr + vocab_size_);
 }
 
 void
 LanguageModel::backward(
-  Params &ret,
   const std::vector<uint32_t> &input,
   const uint32_t target) {
 
+  // hidden-output gradients
+  Vector_t output_grad = output_normed_.array().exp().matrix();
+  output_grad(target) -= 1;
+  hidden_output_w_grad_ += output_grad * hidden_tanh_.transpose();
+  hidden_output_b_grad_ += output_grad;
 
+  // input-hidden gradients
+  Vector_t hidden_grad = output_grad.transpose() * (*hidden_output_w_);
+  hidden_grad = (hidden_grad.array() * 
+    (1 - hidden_tanh_.array().square()))
+    .matrix();
+  for (unsigned int i = 0; i < window_size_; i++) {
+    input_hidden_w_grad_[i] += hidden_grad * wordvec_w_[input[i]].transpose();
+  }
+  input_hidden_b_grad_ += hidden_grad;
+
+  // word vector gradients
+  for (unsigned int i = 0; i < window_size_; i++) {
+    uint32_t idx = input[i];
+    Vector_t input_grad = hidden_grad.transpose() * input_hidden_w_[i];
+    auto itr = wordvec_w_grad_.find(idx);
+    if (itr == wordvec_w_grad_.end()) {
+      wordvec_w_grad_[idx] = input_grad;
+    } else {
+      wordvec_w_grad_[idx] += input_grad;
+    }
+  }
+}
+
+void
+LanguageModel::zero_grad_params() {
+  wordvec_w_grad_.clear();
+  for (unsigned int i = 0; i < window_size_; i++) {
+    input_hidden_w_grad_[i].setZero();
+  }
+  input_hidden_b_grad_.setZero();
+  hidden_output_w_grad_.setZero();
+  hidden_output_b_grad_.setZero();
 }
