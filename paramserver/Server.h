@@ -33,6 +33,7 @@ class ParamServer {
   void read_vocab(const std::string &path);
   static void *server(void *);
   static void *heartbeat(void *);
+  static void *backup_params(void *);
 
  protected:
   // ParamServer port
@@ -42,6 +43,7 @@ class ParamServer {
   LogCabin::Client::Cluster cluster_;
 
   pthread_t server_thread_;
+  pthread_t backup_thread_;
   std::unordered_map<std::string, pthread_t> heartbeat_threads_;
   std::unordered_map<std::string, std::unique_ptr<WorkerServiceClient>>
     worker_clients_;

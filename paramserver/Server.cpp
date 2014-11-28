@@ -31,6 +31,24 @@ get_worker_key(const std::string &ip, const int32_t port) {
   return ss.str();
 }
 
+std::string serialize_params(const Params &obj) {
+  shared_ptr<TMemoryBuffer> transportOut(new TMemoryBuffer());
+  shared_ptr<TBinaryProtocol> protocolOut(new TBinaryProtocol(transportOut));
+  obj.write(protocolOut.get());
+  std::string serialized_string = transportOut->getBufferAsString();
+  return serialized_string;
+}
+
+void deserialize_params(const std::string &serialized_string, Params *params) {
+  char *buf = new char[serialized_string.size()];
+  strncpy(buf, serialized_string.c_str(), serialized_string.size());
+  shared_ptr<TMemoryBuffer> transportIn(
+      new TMemoryBuffer((uint8_t *)buf, (uint32_t)serialized_string.size()));
+  shared_ptr<TBinaryProtocol> protocolIn(new TBinaryProtocol(transportIn));
+  params->read(protocolIn.get());
+  delete[] buf;
+}
+
 struct HeartbeatConfig {
   ParamServer *server;
   std::string ip;
@@ -75,6 +93,13 @@ ParamServer::ParamServer(
   model_info_.hidden_dim = hidden_dim;
   model_ = std::unique_ptr<LanguageModel>(new LanguageModel(model_info_));
   model_->random_init();
+  
+  // set up logcabin directories
+  Tree tree = cluster_.getTree();
+  tree.makeDirectoryEx("/data");
+  
+  // launch backup params thread
+  pthread_create(&backup_thread_, NULL, &ParamServer::backup_params, this);
 }
 
 void 
@@ -213,6 +238,30 @@ ParamServer::heartbeat(void * arg) {
   // Handle stopping worker, reassigning work to other workers, etc.
   std::cout << "Handling reassignment" << std::endl;
   return NULL;
+}
+
+void *
+ParamServer::backup_params(void * arg) {
+  ParamServer *context = (ParamServer *)arg;
+  
+  while (true) {
+    std::cout << "Backing up params to LogCabin." << std::endl;
+
+    // Write parameters to cluster
+    Params params;
+    context->model_->get_params(params);
+    std::string serialized = serialize_params(params);
+    Tree tree = context->cluster_.getTree();
+    
+    // Currently, the serialized params exceeds the max message size. Right now,
+    // to demo that backup works, I'm truncating the serialized string to the
+    // first 1024 bytes.
+    tree.writeEx("/data/params", serialized.substr(0, 1024));
+    std::string contents = tree.readEx("/data/params");
+    assert(contents == serialized.substr(0, 1024));
+    
+    sleep(20);
+  }
 }
 
 void
