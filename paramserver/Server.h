@@ -1,6 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <mutex>
 #include <pthread.h>
 #include <unordered_map>
 
@@ -25,6 +26,7 @@ class ParamServer {
   void run();
 
  protected:
+  void reshard();
   void add_worker(const std::string &ip, const int32_t port);
   void read_vocab(const std::string &path);
   static void *server(void *);
@@ -45,16 +47,21 @@ class ParamServer {
   pthread_t backup_thread_;
   
   // Heartbeat thread handles (one per worker).
+  std::mutex heartbeat_threads_lock_;
   std::unordered_map<std::string, pthread_t> heartbeat_threads_;
   
   // Worker RPC stubs.
+  std::mutex worker_clients_lock_;
   std::unordered_map<std::string, std::unique_ptr<WorkerServiceClient>>
     worker_clients_;
 
   // Paths to data shards
+  std::mutex shard_paths_lock_;
   std::vector<std::string> shard_paths_;
+  std::unordered_map<std::string, std::vector<std::string>> worker_to_shards_;
 
   // Language model
+  std::mutex model_lock_;
   distrust::ModelInfo model_info_;
   std::unique_ptr<LanguageModel> model_;
 };
