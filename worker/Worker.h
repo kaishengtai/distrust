@@ -50,8 +50,6 @@ class Worker {
   // Threads
   pthread_t server_thread_;    // worker service
   pthread_t announce_thread_;  // announce to master
-  pthread_t pull_thread_;      // parameter pulling
-  pthread_t push_thread_;      // update pushing
   pthread_t compute_thread_;   // update computation
 
   // Connection info

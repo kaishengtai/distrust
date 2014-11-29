@@ -164,7 +164,9 @@ Worker::compute(void *arg) {
   pthread_mutex_unlock(&self->shard_paths_lock_);
   std::ifstream cur_shard(cur_shard_path);
 
-  // Compute on the current batch
+  int count = 0;
+
+  // Compute gradient update
   while (true) {
     pthread_mutex_lock(&self->stop_lock_);
     while (self->stop_) {
@@ -208,42 +210,31 @@ Worker::compute(void *arg) {
 
     // Compute gradient update
     std::cout << "Computing on sentence" << std::endl;
-    self->model_->zero_grad_params();
     for (unsigned int i = window; i < tokens.size(); i++) {
       uint32_t target = tokens[i];
       std::vector<uint32_t> input(
         tokens.begin() + i - window, tokens.begin() + i);
       self->model_->forward(input);
       self->model_->backward(input, target);
+      count++;
+
+      if (count == self->batch_size_) {
+        count = 0;
+        
+        // get update and push
+        std::cout << "Pushing update" << std::endl;
+        ParamUpdate update;
+        self->model_->get_update(update, self->learn_rate_);
+        self->model_->zero_grad_params();
+        self->param_client_->push_update(update);
+
+        // pull latest parameters
+        std::cout << "Pulling params" << std::endl;
+        Params params;
+        self->param_client_->pull_params(params);
+        self->model_->set_params(params);
+      }
     }
-
-    // get update and push
-    ParamUpdate update;
-    self->model_->get_update(update, self->learn_rate_);
-  }
-
-  return NULL;
-}
-
-void *
-Worker::push(void *arg) {
-  Worker *self = (Worker *) arg;
-
-  // while (true) {
-
-  //   std::cout << "Pushing update" << std::endl;
-  // }
-
-  return NULL;
-}
-
-void *
-Worker::pull(void *arg) {
-  Worker *self = (Worker *) arg;
-
-  while (true) {
-    sleep(5);
-    std::cout << "Pulling parameters" << std::endl;
   }
 
   return NULL;
@@ -254,13 +245,9 @@ Worker::run() {
   int server_ret = pthread_create(&server_thread_, NULL, &Worker::server, this);
   int announce_ret = pthread_create(&announce_thread_, NULL, &Worker::announce, this);
   int compute_ret = pthread_create(&compute_thread_, NULL, &Worker::compute, this);
-  int push_ret = pthread_create(&push_thread_, NULL, &Worker::push, this);
-  int pull_ret = pthread_create(&pull_thread_, NULL, &Worker::pull, this);
   pthread_join(server_thread_, NULL);
   pthread_join(announce_thread_, NULL);
   pthread_join(compute_thread_, NULL);
-  pthread_join(push_thread_, NULL);
-  pthread_join(pull_thread_, NULL);
 }
 
 void
