@@ -52,7 +52,6 @@ class Worker {
   pthread_t announce_thread_;  // announce to master
   pthread_t pull_thread_;      // parameter pulling
   pthread_t push_thread_;      // update pushing
-  pthread_t reader_thread_;    // data reading
   pthread_t compute_thread_;   // update computation
 
   // Connection info
@@ -61,6 +60,7 @@ class Worker {
 
   // Paths to training data
   std::queue<std::string> shard_paths_;
+  pthread_cond_t has_shards_cond_;
   pthread_mutex_t shard_paths_lock_;
 
   // Paths to all shards completed by worker

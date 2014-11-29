@@ -68,6 +68,10 @@ WorkerServiceHandler::reassign(const std::vector<std::string> &shard_paths) {
       worker_->shard_paths_.push(path);
     }
   }
+
+  if (worker_->shard_paths_.size() > 0) {
+    pthread_cond_signal(&worker_->has_shards_cond_);
+  }
   pthread_mutex_unlock(&worker_->shard_paths_lock_);
 
   std::cout << "[reassign] assigned shards:" << std::endl;

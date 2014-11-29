@@ -40,6 +40,7 @@ Worker::Worker(
   pthread_mutex_init(&server_ready_lock_, NULL);
   pthread_cond_init(&server_ready_cond_, NULL);
   pthread_cond_init(&stop_cond_, NULL);
+  pthread_cond_init(&has_shards_cond_, NULL);
 
   shared_ptr<TSocket> socket(new TSocket(master_ip.data(), master_port));
   shared_ptr<TTransport> transport(new TBufferedTransport(socket));
@@ -62,76 +63,69 @@ Worker::Worker(
 
 void *
 Worker::server(void *arg) {
-  Worker *context = (Worker *) arg;
-  pthread_mutex_lock(&context->server_ready_lock_);
-  const int worker_port = context->worker_port_;
+  Worker *self = (Worker *) arg;
+  pthread_mutex_lock(&self->server_ready_lock_);
+  const int worker_port = self->worker_port_;
   std::cout << "Starting worker on port " << worker_port << std::endl;
-  shared_ptr<WorkerServiceHandler> handler(new WorkerServiceHandler(context));
+  shared_ptr<WorkerServiceHandler> handler(new WorkerServiceHandler(self));
   shared_ptr<TProcessor> processor(new WorkerServiceProcessor(handler));
   shared_ptr<TServerTransport> serverTransport(new TServerSocket(worker_port));
   shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
   shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
   TThreadedServer server(processor, serverTransport, transportFactory, protocolFactory);
-  context->server_ready_ = true;
-  pthread_cond_signal(&context->server_ready_cond_);
-  pthread_mutex_unlock(&context->server_ready_lock_);
+  self->server_ready_ = true;
+  pthread_cond_signal(&self->server_ready_cond_);
+  pthread_mutex_unlock(&self->server_ready_lock_);
   server.serve();
   return NULL;
 }
 
 void *
 Worker::announce(void *arg) {
-  Worker *context = (Worker *) arg;
+  Worker *self = (Worker *) arg;
 
   // Wait until the server signals that it's starting up.
-  pthread_mutex_lock(&context->server_ready_lock_);
-  while (!context->server_ready_) {
-    pthread_cond_wait(&context->server_ready_cond_, &context->server_ready_lock_);
+  pthread_mutex_lock(&self->server_ready_lock_);
+  while (!self->server_ready_) {
+    pthread_cond_wait(&self->server_ready_cond_, &self->server_ready_lock_);
   }
-  pthread_mutex_unlock(&context->server_ready_lock_);
+  pthread_mutex_unlock(&self->server_ready_lock_);
 
   // Give the server time to start up
   sleep(1);
 
   // Announce the worker to the master.
   // No requests from the master will be received until after this point.
-  pthread_mutex_lock(&context->stop_lock_);
+  pthread_mutex_lock(&self->stop_lock_);
   AnnounceResponse resp;
-  context->param_client_->announce(resp, context->worker_port_);
+  self->param_client_->announce(resp, self->worker_port_);
 
   // Initialize model parameters.
   // Takes ownership of memory holding parameters.
-  pthread_mutex_lock(&context->model_lock_);
-  context->model_info_ = resp.model_info;
+  pthread_mutex_lock(&self->model_lock_);
+  self->model_info_ = resp.model_info;
   for (unsigned int i = 0; i < resp.model_info.vocab.size(); i++) {
-    context->vocab_[resp.model_info.vocab[i]] = i;
+    self->vocab_[resp.model_info.vocab[i]] = i;
   }
 
-  context->model_ = std::unique_ptr<LanguageModel>(
+  self->model_ = std::unique_ptr<LanguageModel>(
     new LanguageModel(resp.model_info));
-  context->model_->set_params(resp.params);
-  pthread_mutex_unlock(&context->model_lock_);
+  self->model_->set_params(resp.params);
+  pthread_mutex_unlock(&self->model_lock_);
 
-  pthread_mutex_lock(&context->shard_paths_lock_);
+  pthread_mutex_lock(&self->shard_paths_lock_);
   for (const std::string &path : resp.shard_paths) {
-    context->shard_paths_.push(path);
+    self->shard_paths_.push(path);
   }
-  pthread_mutex_unlock(&context->shard_paths_lock_);
+  pthread_mutex_unlock(&self->shard_paths_lock_);
 
-  context->learn_rate_ = resp.learn_rate;
-  context->batch_size_ = resp.batch_size;
+  self->learn_rate_ = resp.learn_rate;
+  self->batch_size_ = resp.batch_size;
 
   // Signal start of computation
-  context->stop_ = false;
-  pthread_cond_signal(&context->stop_cond_);
-  pthread_mutex_unlock(&context->stop_lock_);
-  return NULL;
-}
-
-void *
-Worker::reader(void *arg) {
-  Worker *context = (Worker *) arg;
-
+  self->stop_ = false;
+  pthread_cond_signal(&self->stop_cond_);
+  pthread_mutex_unlock(&self->stop_lock_);
   return NULL;
 }
 
@@ -139,8 +133,6 @@ uint32_t
 Worker::word_index(const std::string &word) {
   boost::regex re("[0-9]");
   std::string token = boost::regex_replace(word, re, "0");
-  //std::regex_replace(
-  //  std::back_inserter(token), word.begin(), word.end(), re, "0");
   uint32_t index = model_info_.unk_token_index;
   auto itr = vocab_.find(token);
   if (itr != vocab_.end()) {
@@ -151,48 +143,58 @@ Worker::word_index(const std::string &word) {
 
 void *
 Worker::compute(void *arg) {
-  Worker *context = (Worker *) arg;
+  Worker *self = (Worker *) arg;
 
   // Wait for computation to start
-  pthread_mutex_lock(&context->stop_lock_);
-  while (context->stop_) {
-    pthread_cond_wait(&context->stop_cond_, &context->stop_lock_);
+  pthread_mutex_lock(&self->stop_lock_);
+  while (self->stop_) {
+    pthread_cond_wait(&self->stop_cond_, &self->stop_lock_);
   }
-  pthread_mutex_unlock(&context->stop_lock_);
+  pthread_mutex_unlock(&self->stop_lock_);
   std::cout << "Starting computation" << std::endl;
 
   // Get shard path
-  pthread_mutex_lock(&context->shard_paths_lock_);
-  std::string cur_shard_path = context->shard_paths_.front();
-  context->shard_paths_.pop();
-  pthread_mutex_unlock(&context->shard_paths_lock_);
+  pthread_mutex_lock(&self->shard_paths_lock_);
+  while (self->shard_paths_.size() == 0) {
+    std::cout << "No shards assigned -- waiting" << std::endl;
+    pthread_cond_wait(&self->has_shards_cond_, &self->shard_paths_lock_);
+  }
+  std::string cur_shard_path = self->shard_paths_.front();
+  self->shard_paths_.pop();
+  pthread_mutex_unlock(&self->shard_paths_lock_);
   std::ifstream cur_shard(cur_shard_path);
-  //std::vector<std::string> cur_line;
-  //int cur_index = 1;
 
   // Compute on the current batch
   while (true) {
-    pthread_mutex_lock(&context->stop_lock_);
-    while (context->stop_) {
+    pthread_mutex_lock(&self->stop_lock_);
+    while (self->stop_) {
       std::cout << "Stopped" << std::endl;
-      pthread_cond_wait(&context->stop_cond_, &context->stop_lock_);
+      pthread_cond_wait(&self->stop_cond_, &self->stop_lock_);
       std::cout << "Started" << std::endl;
     }
-    pthread_mutex_unlock(&context->stop_lock_);
+    pthread_mutex_unlock(&self->stop_lock_);
 
     // Read next line
-    int window = context->model_info_.window_size;
+    int window = self->model_info_.window_size;
     std::string line, word;
     std::vector<uint32_t> tokens;
     for (int i = 0; i < window - 1; i++) {
-      tokens.push_back(context->model_info_.start_token_index);
+      tokens.push_back(self->model_info_.start_token_index);
     }
 
     while (!std::getline(cur_shard, line)) {
-      pthread_mutex_lock(&context->shard_paths_lock_);
-      cur_shard_path = context->shard_paths_.front();
-      context->shard_paths_.pop();
-      pthread_mutex_unlock(&context->shard_paths_lock_);
+      pthread_mutex_lock(&self->completed_shards_lock_);
+      self->completed_shards_.insert(cur_shard_path);
+      pthread_mutex_unlock(&self->completed_shards_lock_);
+
+      pthread_mutex_lock(&self->shard_paths_lock_);
+      while (self->shard_paths_.size() == 0) {
+        std::cout << "No more shards assigned -- waiting" << std::endl;
+        pthread_cond_wait(&self->has_shards_cond_, &self->shard_paths_lock_);
+      }
+      cur_shard_path = self->shard_paths_.front();
+      self->shard_paths_.pop();
+      pthread_mutex_unlock(&self->shard_paths_lock_);
       cur_shard.close();
       cur_shard.open(cur_shard_path);
     }
@@ -200,25 +202,24 @@ Worker::compute(void *arg) {
     std::stringstream ss(line);
     
     while (std::getline(ss, word, ' ')) {
-      tokens.push_back(context->word_index(word));
+      tokens.push_back(self->word_index(word));
     }
-    tokens.push_back(context->model_info_.end_token_index);
+    tokens.push_back(self->model_info_.end_token_index);
 
     // Compute gradient update
     std::cout << "Computing on sentence" << std::endl;
-    context->model_->zero_grad_params();
+    self->model_->zero_grad_params();
     for (unsigned int i = window; i < tokens.size(); i++) {
       uint32_t target = tokens[i];
       std::vector<uint32_t> input(
         tokens.begin() + i - window, tokens.begin() + i);
-      context->model_->forward(input);
-      context->model_->backward(input, target);
+      self->model_->forward(input);
+      self->model_->backward(input, target);
     }
 
     // get update and push
-    std::cout << "getting update" << std::endl;
     ParamUpdate update;
-    context->model_->get_update(update, context->learn_rate_);
+    self->model_->get_update(update, self->learn_rate_);
   }
 
   return NULL;
@@ -226,7 +227,7 @@ Worker::compute(void *arg) {
 
 void *
 Worker::push(void *arg) {
-  Worker *context = (Worker *) arg;
+  Worker *self = (Worker *) arg;
 
   // while (true) {
 
@@ -238,7 +239,7 @@ Worker::push(void *arg) {
 
 void *
 Worker::pull(void *arg) {
-  Worker *context = (Worker *) arg;
+  Worker *self = (Worker *) arg;
 
   while (true) {
     sleep(5);
@@ -252,13 +253,11 @@ void
 Worker::run() {
   int server_ret = pthread_create(&server_thread_, NULL, &Worker::server, this);
   int announce_ret = pthread_create(&announce_thread_, NULL, &Worker::announce, this);
-  //int reader_ret = pthread_create(&reader_thread_, NULL, &Worker::reader, this);
   int compute_ret = pthread_create(&compute_thread_, NULL, &Worker::compute, this);
   int push_ret = pthread_create(&push_thread_, NULL, &Worker::push, this);
   int pull_ret = pthread_create(&pull_thread_, NULL, &Worker::pull, this);
   pthread_join(server_thread_, NULL);
   pthread_join(announce_thread_, NULL);
-  //pthread_join(reader_thread_, NULL);
   pthread_join(compute_thread_, NULL);
   pthread_join(push_thread_, NULL);
   pthread_join(pull_thread_, NULL);
