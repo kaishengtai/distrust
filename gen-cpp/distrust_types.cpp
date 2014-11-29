@@ -682,8 +682,8 @@ void swap(ParamUpdate &a, ParamUpdate &b) {
   swap(a.__isset, b.__isset);
 }
 
-const char* AnnounceResponse::ascii_fingerprint = "4CDD03BA703CF1CB9385436F27ACC82A";
-const uint8_t AnnounceResponse::binary_fingerprint[16] = {0x4C,0xDD,0x03,0xBA,0x70,0x3C,0xF1,0xCB,0x93,0x85,0x43,0x6F,0x27,0xAC,0xC8,0x2A};
+const char* AnnounceResponse::ascii_fingerprint = "CF757616D00450E15C73B4E398548BE7";
+const uint8_t AnnounceResponse::binary_fingerprint[16] = {0xCF,0x75,0x76,0x16,0xD0,0x04,0x50,0xE1,0x5C,0x73,0xB4,0xE3,0x98,0x54,0x8B,0xE7};
 
 uint32_t AnnounceResponse::read(::apache::thrift::protocol::TProtocol* iprot) {
 
@@ -749,6 +749,14 @@ uint32_t AnnounceResponse::read(::apache::thrift::protocol::TProtocol* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 5:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->batch_size);
+          this->__isset.batch_size = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -789,6 +797,10 @@ uint32_t AnnounceResponse::write(::apache::thrift::protocol::TProtocol* oprot) c
   xfer += oprot->writeDouble(this->learn_rate);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("batch_size", ::apache::thrift::protocol::T_I32, 5);
+  xfer += oprot->writeI32(this->batch_size);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -800,6 +812,7 @@ void swap(AnnounceResponse &a, AnnounceResponse &b) {
   swap(a.params, b.params);
   swap(a.shard_paths, b.shard_paths);
   swap(a.learn_rate, b.learn_rate);
+  swap(a.batch_size, b.batch_size);
   swap(a.__isset, b.__isset);
 }
 
@@ -885,8 +898,8 @@ void swap(HBResponse &a, HBResponse &b) {
   swap(a.__isset, b.__isset);
 }
 
-const char* StartRequest::ascii_fingerprint = "F96E9B21D37ECC1E6B1D9CC351B177C9";
-const uint8_t StartRequest::binary_fingerprint[16] = {0xF9,0x6E,0x9B,0x21,0xD3,0x7E,0xCC,0x1E,0x6B,0x1D,0x9C,0xC3,0x51,0xB1,0x77,0xC9};
+const char* StartRequest::ascii_fingerprint = "D5FBD733341E7B24E6886D2BF393E431";
+const uint8_t StartRequest::binary_fingerprint[16] = {0xD5,0xFB,0xD7,0x33,0x34,0x1E,0x7B,0x24,0xE6,0x88,0x6D,0x2B,0xF3,0x93,0xE4,0x31};
 
 uint32_t StartRequest::read(::apache::thrift::protocol::TProtocol* iprot) {
 
@@ -936,6 +949,14 @@ uint32_t StartRequest::read(::apache::thrift::protocol::TProtocol* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->batch_size);
+          this->__isset.batch_size = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -968,6 +989,10 @@ uint32_t StartRequest::write(::apache::thrift::protocol::TProtocol* oprot) const
   xfer += oprot->writeDouble(this->learn_rate);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("batch_size", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32(this->batch_size);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -977,6 +1002,7 @@ void swap(StartRequest &a, StartRequest &b) {
   using ::std::swap;
   swap(a.shard_paths, b.shard_paths);
   swap(a.learn_rate, b.learn_rate);
+  swap(a.batch_size, b.batch_size);
   swap(a.__isset, b.__isset);
 }
 

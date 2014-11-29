@@ -23,6 +23,7 @@ class Worker {
  protected:
   static void *announce(void *arg);
   static void *server(void *arg);
+  static void *reader(void *arg);
   static void *compute(void *arg);
   static void *pull(void *arg);
   static void *push(void *arg);
@@ -39,6 +40,7 @@ class Worker {
   pthread_t announce_thread_;  // announce to master
   pthread_t pull_thread_;      // parameter pulling
   pthread_t push_thread_;      // update pushing
+  pthread_t reader_thread_;    // data reading
   pthread_t compute_thread_;   // update computation
 
   // Connection info
@@ -55,6 +57,9 @@ class Worker {
 
   // Learning rate
   double learn_rate_;
+
+  // Minibatch size
+  int batch_size_;
 
   // Server status
   bool server_ready_;

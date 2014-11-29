@@ -24,6 +24,7 @@ class LanguageModel {
   void set_params(distrust::Params &params);
   void update_params(const distrust::ParamUpdate &update);
   void get_params(distrust::Params &ret);
+  void get_update(distrust::ParamUpdate &ret, const double learn_rate);
   std::vector<double> forward(const std::vector<uint32_t> &input);
   //Eigen::MatrixXd forward(Eigen::MatrixXd input);
   void backward(const std::vector<uint32_t> &input, const uint32_t target);
@@ -75,6 +76,9 @@ class LanguageModel {
   Vector_t input_hidden_b_grad_;
   Matrix_t hidden_output_w_grad_;
   Vector_t hidden_output_b_grad_;
+
+  // Batch size counter
+  uint32_t batch_size_;
 };
 
 #endif

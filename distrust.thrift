@@ -53,7 +53,8 @@ struct AnnounceResponse {
     1: ModelInfo model_info,
     2: Params params,
     3: list<string> shard_paths,
-    4: double learn_rate
+    4: double learn_rate,
+    5: i32 batch_size,
 }
 
 service ParamService {
@@ -84,7 +85,10 @@ struct StartRequest {
     1: list<string> shard_paths,
 
     // Initial learning rate
-    2: double learn_rate
+    2: double learn_rate,
+
+    // Minibatch size for training
+    3: i32 batch_size,
 }
 
 /**

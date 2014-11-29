@@ -7,7 +7,8 @@ using namespace distrust;
 using namespace Eigen;
 
 LanguageModel::LanguageModel(const ModelInfo &model_info) :
-  unif_(-1.0, 1.0) {
+  unif_(-1.0, 1.0),
+  batch_size_(0) {
 
   window_size_ = model_info.window_size;
   wordvec_dim_ = model_info.wordvec_dim;
@@ -127,6 +128,36 @@ LanguageModel::get_params(Params &ret) {
   ret.hidden_output_b = hidden_output_b_buf_;
 }
 
+void
+LanguageModel::get_update(ParamUpdate &ret, const double learn_rate) {
+  ArrayXd a;
+  double *ptr;
+  for (auto itr = wordvec_w_grad_.begin(); itr != wordvec_w_grad_.end(); itr++) {
+    uint32_t idx = itr->first;
+    a = itr->second.array() * learn_rate / batch_size_;
+    ptr = a.data();
+    ret.wordvec_w[idx] = std::vector<double>(ptr, ptr + wordvec_dim_);
+  }
+
+  for (unsigned int i = 0; i < window_size_; i++) {
+    a = input_hidden_w_grad_[i].array() * learn_rate / batch_size_;
+    ptr = a.data();
+    ret.input_hidden_w.push_back(std::vector<double>(ptr, ptr + hidden_dim_ * wordvec_dim_));
+  }
+
+  a = input_hidden_b_grad_.array() * learn_rate / batch_size_;
+  ptr = a.data();
+  ret.input_hidden_b = std::vector<double>(ptr, ptr + hidden_dim_);
+
+  a = hidden_output_w_grad_.array() * learn_rate / batch_size_;
+  ptr = a.data();
+  ret.hidden_output_w = std::vector<double>(ptr, ptr + vocab_size_ * hidden_dim_);
+
+  a = hidden_output_b_grad_.array() * learn_rate / batch_size_;
+  ptr = a.data();
+  ret.hidden_output_b = std::vector<double>(ptr, ptr + vocab_size_);
+}
+
 VectorXd
 LanguageModel::tanh(const VectorXd &v) {
   ArrayXd a = (v.array() * 2).exp();
@@ -162,6 +193,8 @@ LanguageModel::backward(
   const std::vector<uint32_t> &input,
   const uint32_t target) {
 
+  batch_size_++;
+
   // hidden-output gradients
   Vector_t output_grad = output_normed_.array().exp().matrix();
   output_grad(target) -= 1;
@@ -193,6 +226,7 @@ LanguageModel::backward(
 
 void
 LanguageModel::zero_grad_params() {
+  batch_size_ = 0;
   wordvec_w_grad_.clear();
   for (unsigned int i = 0; i < window_size_; i++) {
     input_hidden_w_grad_[i].setZero();

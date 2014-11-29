@@ -259,20 +259,21 @@ class ParamUpdate {
 void swap(ParamUpdate &a, ParamUpdate &b);
 
 typedef struct _AnnounceResponse__isset {
-  _AnnounceResponse__isset() : model_info(false), params(false), shard_paths(false), learn_rate(false) {}
+  _AnnounceResponse__isset() : model_info(false), params(false), shard_paths(false), learn_rate(false), batch_size(false) {}
   bool model_info;
   bool params;
   bool shard_paths;
   bool learn_rate;
+  bool batch_size;
 } _AnnounceResponse__isset;
 
 class AnnounceResponse {
  public:
 
-  static const char* ascii_fingerprint; // = "4CDD03BA703CF1CB9385436F27ACC82A";
-  static const uint8_t binary_fingerprint[16]; // = {0x4C,0xDD,0x03,0xBA,0x70,0x3C,0xF1,0xCB,0x93,0x85,0x43,0x6F,0x27,0xAC,0xC8,0x2A};
+  static const char* ascii_fingerprint; // = "CF757616D00450E15C73B4E398548BE7";
+  static const uint8_t binary_fingerprint[16]; // = {0xCF,0x75,0x76,0x16,0xD0,0x04,0x50,0xE1,0x5C,0x73,0xB4,0xE3,0x98,0x54,0x8B,0xE7};
 
-  AnnounceResponse() : learn_rate(0) {
+  AnnounceResponse() : learn_rate(0), batch_size(0) {
   }
 
   virtual ~AnnounceResponse() throw() {}
@@ -281,6 +282,7 @@ class AnnounceResponse {
   Params params;
   std::vector<std::string>  shard_paths;
   double learn_rate;
+  int32_t batch_size;
 
   _AnnounceResponse__isset __isset;
 
@@ -300,6 +302,10 @@ class AnnounceResponse {
     learn_rate = val;
   }
 
+  void __set_batch_size(const int32_t val) {
+    batch_size = val;
+  }
+
   bool operator == (const AnnounceResponse & rhs) const
   {
     if (!(model_info == rhs.model_info))
@@ -309,6 +315,8 @@ class AnnounceResponse {
     if (!(shard_paths == rhs.shard_paths))
       return false;
     if (!(learn_rate == rhs.learn_rate))
+      return false;
+    if (!(batch_size == rhs.batch_size))
       return false;
     return true;
   }
@@ -369,24 +377,26 @@ class HBResponse {
 void swap(HBResponse &a, HBResponse &b);
 
 typedef struct _StartRequest__isset {
-  _StartRequest__isset() : shard_paths(false), learn_rate(false) {}
+  _StartRequest__isset() : shard_paths(false), learn_rate(false), batch_size(false) {}
   bool shard_paths;
   bool learn_rate;
+  bool batch_size;
 } _StartRequest__isset;
 
 class StartRequest {
  public:
 
-  static const char* ascii_fingerprint; // = "F96E9B21D37ECC1E6B1D9CC351B177C9";
-  static const uint8_t binary_fingerprint[16]; // = {0xF9,0x6E,0x9B,0x21,0xD3,0x7E,0xCC,0x1E,0x6B,0x1D,0x9C,0xC3,0x51,0xB1,0x77,0xC9};
+  static const char* ascii_fingerprint; // = "D5FBD733341E7B24E6886D2BF393E431";
+  static const uint8_t binary_fingerprint[16]; // = {0xD5,0xFB,0xD7,0x33,0x34,0x1E,0x7B,0x24,0xE6,0x88,0x6D,0x2B,0xF3,0x93,0xE4,0x31};
 
-  StartRequest() : learn_rate(0) {
+  StartRequest() : learn_rate(0), batch_size(0) {
   }
 
   virtual ~StartRequest() throw() {}
 
   std::vector<std::string>  shard_paths;
   double learn_rate;
+  int32_t batch_size;
 
   _StartRequest__isset __isset;
 
@@ -398,11 +408,17 @@ class StartRequest {
     learn_rate = val;
   }
 
+  void __set_batch_size(const int32_t val) {
+    batch_size = val;
+  }
+
   bool operator == (const StartRequest & rhs) const
   {
     if (!(shard_paths == rhs.shard_paths))
       return false;
     if (!(learn_rate == rhs.learn_rate))
+      return false;
+    if (!(batch_size == rhs.batch_size))
       return false;
     return true;
   }

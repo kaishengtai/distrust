@@ -277,6 +277,7 @@ ParamServiceHandler::announce(
   _return.model_info = server_->model_info_;
   _return.shard_paths = server_->shard_paths_;
   _return.learn_rate = 0.1;
+  _return.batch_size = 128;
   server_->model_->get_params(_return.params);
 }
 
@@ -300,7 +301,7 @@ class OptionParser {
         argv_(argv),
         window_size(3),
         wordvec_dim(50),
-        hidden_dim(200),
+        hidden_dim(100),
         port(8000),
         cluster("logcabin:61023") {
     static struct option longOptions[] = {

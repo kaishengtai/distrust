@@ -17,7 +17,11 @@ using boost::shared_ptr;
 
 using namespace distrust;
 
-Worker::Worker(const std::string& master_ip, const int master_port, const int worker_port) :
+Worker::Worker(
+  const std::string& master_ip,
+  const int master_port,
+  const int worker_port) :
+
   master_ip_(master_ip),
   master_port_(master_port),
   worker_port_(worker_port),
@@ -103,6 +107,7 @@ Worker::announce(void *arg) {
   pthread_mutex_unlock(&context->shard_paths_lock_);
 
   context->learn_rate_ = resp.learn_rate;
+  context->batch_size_ = resp.batch_size;
 
   // Signal start of computation
   context->stop_ = false;
@@ -112,9 +117,17 @@ Worker::announce(void *arg) {
 }
 
 void *
+Worker::reader(void *arg) {
+  Worker *context = (Worker *) arg;
+
+  return NULL;
+}
+
+void *
 Worker::compute(void *arg) {
   Worker *context = (Worker *) arg;
 
+  // Compute on the current batch
   while (true) {
     pthread_mutex_lock(&context->stop_lock_);
     while (context->stop_) {
@@ -126,12 +139,18 @@ Worker::compute(void *arg) {
 
     // Perform computation on a batch
     std::cout << "Computing on batch" << std::endl;
-    std::vector<uint32_t> input;
-    input.push_back(0);
-    input.push_back(1);
-    input.push_back(2);
-    context->model_->forward(input);
-    sleep(4);
+    // context->model_->zero_grad_params();
+    // for (int i = 0; i < context->batch_size_; i++) {
+    //   // read input
+    //   std::vector<uint32_t> input;
+    //   uint32_t target;
+    //   context->model_->forward(input);
+    //   context->model_->backward(input, target);
+    // }
+
+    // // get update and push
+    // ParamUpdate update;
+    // context->model_->get_update(update, context->learn_rate_);
   }
 
   return NULL;
@@ -142,7 +161,7 @@ Worker::push(void *arg) {
   Worker *context = (Worker *) arg;
 
   while (true) {
-    sleep(5);
+
     std::cout << "Pushing update" << std::endl;
   }
 
@@ -165,11 +184,13 @@ void
 Worker::run() {
   int server_ret = pthread_create(&server_thread_, NULL, &Worker::server, this);
   int announce_ret = pthread_create(&announce_thread_, NULL, &Worker::announce, this);
+  int reader_ret = pthread_create(&reader_thread_, NULL, &Worker::reader, this);
   int compute_ret = pthread_create(&compute_thread_, NULL, &Worker::compute, this);
   int push_ret = pthread_create(&push_thread_, NULL, &Worker::push, this);
   int pull_ret = pthread_create(&pull_thread_, NULL, &Worker::pull, this);
   pthread_join(server_thread_, NULL);
   pthread_join(announce_thread_, NULL);
+  pthread_join(reader_thread_, NULL);
   pthread_join(compute_thread_, NULL);
   pthread_join(push_thread_, NULL);
   pthread_join(pull_thread_, NULL);
