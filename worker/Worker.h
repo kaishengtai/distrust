@@ -2,6 +2,8 @@
 #define WORKER_H
 
 #include <pthread.h>
+#include <queue>
+#include <unordered_set>
 
 #include "../gen-cpp/WorkerService.h"
 #include "../gen-cpp/ParamService.h"
@@ -27,11 +29,21 @@ class Worker {
   static void *compute(void *arg);
   static void *pull(void *arg);
   static void *push(void *arg);
+  uint32_t word_index(const std::string &word);
+  bool next_example(
+    std::vector<uint32_t> &input,
+    uint32_t &target,
+    std::string &cur_shard_path,
+    std::ifstream &cur_shard,
+    std::vector<std::string> cur_line,
+    int &cur_index);
 
  protected:
   std::unique_ptr<distrust::ParamServiceClient> param_client_;
 
   // The language model holds all our parameters
+  distrust::ModelInfo model_info_;
+  std::unordered_map<std::string, uint32_t> vocab_;
   std::unique_ptr<LanguageModel> model_;
   pthread_mutex_t model_lock_;
 
@@ -48,11 +60,11 @@ class Worker {
   int master_port_, worker_port_;
 
   // Paths to training data
-  std::vector<std::string> shard_paths_;
+  std::queue<std::string> shard_paths_;
   pthread_mutex_t shard_paths_lock_;
 
   // Paths to all shards completed by worker
-  std::vector<std::string> completed_shards_;
+  std::unordered_set<std::string> completed_shards_;
   pthread_mutex_t completed_shards_lock_;
 
   // Learning rate

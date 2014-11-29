@@ -16,6 +16,7 @@ LDFLAGS := -L/usr/local/lib -L../logcabin/build
 
 LIBS := -lboost_system \
 		-lboost_filesystem \
+		-lboost_regex \
 		-lthrift \
 		-llogcabin \
 		-lprotobuf \

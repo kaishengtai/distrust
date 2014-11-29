@@ -6,6 +6,7 @@
 
 #include "gen-cpp/distrust_types.h"
 
+using Eigen::Array;
 using Eigen::Dynamic;
 using Eigen::RowMajor;
 using Eigen::Matrix;
@@ -13,6 +14,7 @@ using Eigen::Map;
 using Eigen::VectorXd;
 
 typedef Matrix<double, Dynamic, Dynamic, RowMajor> Matrix_t;
+typedef Array<double, Dynamic, Dynamic, RowMajor> MArray_t;
 typedef Matrix<double, Dynamic, 1> Vector_t;
 
 class LanguageModel {

@@ -130,31 +130,30 @@ LanguageModel::get_params(Params &ret) {
 
 void
 LanguageModel::get_update(ParamUpdate &ret, const double learn_rate) {
-  ArrayXd a;
   double *ptr;
   for (auto itr = wordvec_w_grad_.begin(); itr != wordvec_w_grad_.end(); itr++) {
     uint32_t idx = itr->first;
-    a = itr->second.array() * learn_rate / batch_size_;
+    ArrayXd a = itr->second.array() * learn_rate;
     ptr = a.data();
     ret.wordvec_w[idx] = std::vector<double>(ptr, ptr + wordvec_dim_);
   }
 
   for (unsigned int i = 0; i < window_size_; i++) {
-    a = input_hidden_w_grad_[i].array() * learn_rate / batch_size_;
+    MArray_t a = input_hidden_w_grad_[i].array() * learn_rate;
     ptr = a.data();
     ret.input_hidden_w.push_back(std::vector<double>(ptr, ptr + hidden_dim_ * wordvec_dim_));
   }
 
-  a = input_hidden_b_grad_.array() * learn_rate / batch_size_;
-  ptr = a.data();
+  ArrayXd a_ihb = input_hidden_b_grad_.array() * learn_rate;
+  ptr = a_ihb.data();
   ret.input_hidden_b = std::vector<double>(ptr, ptr + hidden_dim_);
 
-  a = hidden_output_w_grad_.array() * learn_rate / batch_size_;
-  ptr = a.data();
+  MArray_t a_how = hidden_output_w_grad_.array() * learn_rate;
+  ptr = a_how.data();
   ret.hidden_output_w = std::vector<double>(ptr, ptr + vocab_size_ * hidden_dim_);
 
-  a = hidden_output_b_grad_.array() * learn_rate / batch_size_;
-  ptr = a.data();
+  ArrayXd a_hob = hidden_output_b_grad_.array() * learn_rate;
+  ptr = a_hob.data();
   ret.hidden_output_b = std::vector<double>(ptr, ptr + vocab_size_);
 }
 

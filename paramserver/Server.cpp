@@ -276,7 +276,7 @@ ParamServiceHandler::announce(
   // Return parameters
   _return.model_info = server_->model_info_;
   _return.shard_paths = server_->shard_paths_;
-  _return.learn_rate = 0.1;
+  _return.learn_rate = 0.025;
   _return.batch_size = 128;
   server_->model_->get_params(_return.params);
 }

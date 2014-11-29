@@ -1,7 +1,12 @@
 #include "Worker.h"
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <getopt.h>
+
+#include <boost/regex.hpp>
+
 #include <transport/TSocket.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TThreadedServer.h>
@@ -97,13 +102,20 @@ Worker::announce(void *arg) {
   // Initialize model parameters.
   // Takes ownership of memory holding parameters.
   pthread_mutex_lock(&context->model_lock_);
+  context->model_info_ = resp.model_info;
+  for (unsigned int i = 0; i < resp.model_info.vocab.size(); i++) {
+    context->vocab_[resp.model_info.vocab[i]] = i;
+  }
+
   context->model_ = std::unique_ptr<LanguageModel>(
     new LanguageModel(resp.model_info));
   context->model_->set_params(resp.params);
   pthread_mutex_unlock(&context->model_lock_);
 
   pthread_mutex_lock(&context->shard_paths_lock_);
-  context->shard_paths_ = resp.shard_paths;
+  for (const std::string &path : resp.shard_paths) {
+    context->shard_paths_.push(path);
+  }
   pthread_mutex_unlock(&context->shard_paths_lock_);
 
   context->learn_rate_ = resp.learn_rate;
@@ -123,9 +135,40 @@ Worker::reader(void *arg) {
   return NULL;
 }
 
+uint32_t
+Worker::word_index(const std::string &word) {
+  boost::regex re("[0-9]");
+  std::string token = boost::regex_replace(word, re, "0");
+  //std::regex_replace(
+  //  std::back_inserter(token), word.begin(), word.end(), re, "0");
+  uint32_t index = model_info_.unk_token_index;
+  auto itr = vocab_.find(token);
+  if (itr != vocab_.end()) {
+    index = itr->second;
+  }
+  return index;
+}
+
 void *
 Worker::compute(void *arg) {
   Worker *context = (Worker *) arg;
+
+  // Wait for computation to start
+  pthread_mutex_lock(&context->stop_lock_);
+  while (context->stop_) {
+    pthread_cond_wait(&context->stop_cond_, &context->stop_lock_);
+  }
+  pthread_mutex_unlock(&context->stop_lock_);
+  std::cout << "Starting computation" << std::endl;
+
+  // Get shard path
+  pthread_mutex_lock(&context->shard_paths_lock_);
+  std::string cur_shard_path = context->shard_paths_.front();
+  context->shard_paths_.pop();
+  pthread_mutex_unlock(&context->shard_paths_lock_);
+  std::ifstream cur_shard(cur_shard_path);
+  //std::vector<std::string> cur_line;
+  //int cur_index = 1;
 
   // Compute on the current batch
   while (true) {
@@ -137,20 +180,45 @@ Worker::compute(void *arg) {
     }
     pthread_mutex_unlock(&context->stop_lock_);
 
-    // Perform computation on a batch
-    std::cout << "Computing on batch" << std::endl;
-    // context->model_->zero_grad_params();
-    // for (int i = 0; i < context->batch_size_; i++) {
-    //   // read input
-    //   std::vector<uint32_t> input;
-    //   uint32_t target;
-    //   context->model_->forward(input);
-    //   context->model_->backward(input, target);
-    // }
+    // Read next line
+    int window = context->model_info_.window_size;
+    std::string line, word;
+    std::vector<uint32_t> tokens;
+    for (int i = 0; i < window - 1; i++) {
+      tokens.push_back(context->model_info_.start_token_index);
+    }
 
-    // // get update and push
-    // ParamUpdate update;
-    // context->model_->get_update(update, context->learn_rate_);
+    while (!std::getline(cur_shard, line)) {
+      pthread_mutex_lock(&context->shard_paths_lock_);
+      cur_shard_path = context->shard_paths_.front();
+      context->shard_paths_.pop();
+      pthread_mutex_unlock(&context->shard_paths_lock_);
+      cur_shard.close();
+      cur_shard.open(cur_shard_path);
+    }
+
+    std::stringstream ss(line);
+    
+    while (std::getline(ss, word, ' ')) {
+      tokens.push_back(context->word_index(word));
+    }
+    tokens.push_back(context->model_info_.end_token_index);
+
+    // Compute gradient update
+    std::cout << "Computing on sentence" << std::endl;
+    context->model_->zero_grad_params();
+    for (unsigned int i = window; i < tokens.size(); i++) {
+      uint32_t target = tokens[i];
+      std::vector<uint32_t> input(
+        tokens.begin() + i - window, tokens.begin() + i);
+      context->model_->forward(input);
+      context->model_->backward(input, target);
+    }
+
+    // get update and push
+    std::cout << "getting update" << std::endl;
+    ParamUpdate update;
+    context->model_->get_update(update, context->learn_rate_);
   }
 
   return NULL;
@@ -160,10 +228,10 @@ void *
 Worker::push(void *arg) {
   Worker *context = (Worker *) arg;
 
-  while (true) {
+  // while (true) {
 
-    std::cout << "Pushing update" << std::endl;
-  }
+  //   std::cout << "Pushing update" << std::endl;
+  // }
 
   return NULL;
 }
@@ -184,13 +252,13 @@ void
 Worker::run() {
   int server_ret = pthread_create(&server_thread_, NULL, &Worker::server, this);
   int announce_ret = pthread_create(&announce_thread_, NULL, &Worker::announce, this);
-  int reader_ret = pthread_create(&reader_thread_, NULL, &Worker::reader, this);
+  //int reader_ret = pthread_create(&reader_thread_, NULL, &Worker::reader, this);
   int compute_ret = pthread_create(&compute_thread_, NULL, &Worker::compute, this);
   int push_ret = pthread_create(&push_thread_, NULL, &Worker::push, this);
   int pull_ret = pthread_create(&pull_thread_, NULL, &Worker::pull, this);
   pthread_join(server_thread_, NULL);
   pthread_join(announce_thread_, NULL);
-  pthread_join(reader_thread_, NULL);
+  //pthread_join(reader_thread_, NULL);
   pthread_join(compute_thread_, NULL);
   pthread_join(push_thread_, NULL);
   pthread_join(pull_thread_, NULL);
