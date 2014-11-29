@@ -3,16 +3,12 @@
 
 #include <pthread.h>
 #include <unordered_map>
-#include <transport/TSocket.h>
 
 #include "../LanguageModel.h"
-#include "distrust/gen-cpp/ParamService.h"
 #include "distrust/gen-cpp/WorkerService.h"
 #include "logcabin/Client/Client.h"
 
-using apache::thrift::TConnectionInfo;
-using apache::thrift::transport::TSocket;
-using distrust::WorkerServiceClient;
+namespace distrust {
 
 class ParamServer {
  friend class ParamServiceHandler;
@@ -42,9 +38,16 @@ class ParamServer {
   // Raft cluster
   LogCabin::Client::Cluster cluster_;
 
+  // Main thread handle
   pthread_t server_thread_;
+  
+  // Backup parameters thread handle.  
   pthread_t backup_thread_;
+  
+  // Heartbeat thread handles (one per worker).
   std::unordered_map<std::string, pthread_t> heartbeat_threads_;
+  
+  // Worker RPC stubs.
   std::unordered_map<std::string, std::unique_ptr<WorkerServiceClient>>
     worker_clients_;
 
@@ -56,38 +59,6 @@ class ParamServer {
   std::unique_ptr<LanguageModel> model_;
 };
 
-class ParamServiceHandler : virtual public distrust::ParamServiceIf {
- public:
-  ParamServiceHandler(ParamServer *server, const std::string &worker_ip)
-    : server_(server),
-      worker_ip_(worker_ip) { }
+}  // namespace distrust
 
-  void announce(distrust::AnnounceResponse &_return, const int32_t worker_port);
-  void push_update(const distrust::ParamUpdate &update);
-  void pull_params(distrust::Params &_return);
-
- protected:
-  ParamServer *server_;
-  std::string worker_ip_;
-};
-
-class ParamServiceHandlerFactory : virtual public distrust::ParamServiceIfFactory {
- public:
-  ParamServiceHandlerFactory(ParamServer *server) : server_(server) { }
-
-  // This can be used to open a reverse connection from paramserver to worker
-  ParamServiceHandler* getHandler(const TConnectionInfo& connInfo) {
-    boost::shared_ptr<TSocket> socket = 
-      boost::dynamic_pointer_cast<TSocket>(connInfo.transport);
-    return new ParamServiceHandler(server_, socket->getPeerAddress());
-  }
-
-  void releaseHandler(distrust::ParamServiceIf* handler) {
-    delete handler;
-  }
- 
- protected:
-  ParamServer *server_;
-};
-
-#endif
+#endif  // SERVER_H

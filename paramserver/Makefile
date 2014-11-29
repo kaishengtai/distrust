@@ -1,5 +1,7 @@
 SERVER_SRC := paramserver/Server.cpp \
-		      LanguageModel.cpp
+			  paramserver/ParamServiceHandler.cpp \
+			  paramserver/ServerMain.cpp \
+			  LanguageModel.cpp
 
 SERVER_OBJ := $(SERVER_SRC:.cpp=.o)
 
