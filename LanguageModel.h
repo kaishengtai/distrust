@@ -1,6 +1,7 @@
 #ifndef LANGUAGEMODEL_H
 #define LANGUAGEMODEL_H
 
+#include <random>
 #include <unordered_map>
 #include <Eigen/Dense>
 

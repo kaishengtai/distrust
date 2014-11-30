@@ -1,8 +1,6 @@
 #include "Server.h"
 #include "ParamServiceHandler.h"
 
-#include "logcabin/Client/Client.h"
-
 #include <chrono>
 #include <iostream>
 #include <fstream>
@@ -21,9 +19,6 @@ using namespace apache::thrift::transport;
 using namespace apache::thrift::server;
 using namespace std::chrono;
 namespace fs = boost::filesystem;
-
-using LogCabin::Client::Cluster;
-using LogCabin::Client::Tree;
 
 using boost::shared_ptr;
 
@@ -63,11 +58,9 @@ ParamServer::ParamServer(
   const int32_t wordvec_dim,
   const int32_t hidden_dim,
   const int32_t port,
-  const std::string &raft_cluster,
   const std::string &train_dir,
   const std::string &test_dir) :
-    port_(port),
-    cluster_(raft_cluster) { 
+    port_(port) { 
 
   if (!fs::exists(train_dir) || !fs::is_directory(train_dir)) {
     throw std::invalid_argument("Invalid data directory: " + train_dir);
@@ -98,10 +91,6 @@ ParamServer::ParamServer(
   model_ = std::unique_ptr<LanguageModel>(new LanguageModel(model_info_));
   model_->random_init();
   model_write_lock.unlock();
-
-  // set up logcabin directories
-  Tree tree = cluster_.getTree();
-  tree.makeDirectoryEx("/data");
 
   // launch backup params thread
   pthread_create(&backup_thread_, NULL, &ParamServer::backup_params, this);
@@ -348,24 +337,24 @@ void *
 ParamServer::backup_params(void * arg) {
   ParamServer *context = (ParamServer *)arg;
   
-  while (true) {
-    std::cout << "Backing up params to LogCabin." << std::endl;
+  // while (true) {
+  //   std::cout << "Backing up params to LogCabin." << std::endl;
 
-    // Write parameters to cluster
-    Params params;
-    context->model_->get_params(params);
-    std::string serialized = serialize_params(params);
-    Tree tree = context->cluster_.getTree();
+  //   // Write parameters to cluster
+  //   Params params;
+  //   context->model_->get_params(params);
+  //   std::string serialized = serialize_params(params);
+  //   Tree tree = context->cluster_.getTree();
     
-    // Currently, the serialized params exceeds the max message size. Right now,
-    // to demo that backup works, I'm truncating the serialized string to the
-    // first 1024 bytes.
-    tree.writeEx("/data/params", serialized.substr(0, 1024));
-    std::string contents = tree.readEx("/data/params");
-    assert(contents == serialized.substr(0, 1024));
+  //   // Currently, the serialized params exceeds the max message size. Right now,
+  //   // to demo that backup works, I'm truncating the serialized string to the
+  //   // first 1024 bytes.
+  //   tree.writeEx("/data/params", serialized.substr(0, 1024));
+  //   std::string contents = tree.readEx("/data/params");
+  //   assert(contents == serialized.substr(0, 1024));
     
-    sleep(20);
-  }
+  //   sleep(20);
+  // }
 }
 
 void *
@@ -380,7 +369,6 @@ ParamServer::test_model(void *arg) {
     std::cout << "Computing log-perplexity on validation set" << std::endl;
     int word_count = 0;
     double loss = 0.0;
-    uint32_t start = time_millis();
     std::ifstream ifs;
     for (const std::string &path : context->test_shard_paths_) {
       std::cout << path << std::endl;
@@ -397,16 +385,12 @@ ParamServer::test_model(void *arg) {
             tokens.begin() + i - window, tokens.begin() + i);
           loss -= model.forward(input)[target];
         }
-
-        uint32_t elapsed = time_millis() - start;
-        std::cout << word_count / (elapsed / 1000.0) << std::endl;
       }
 
       ifs.close();
     }
 
     printf("Validation set log-perplexity: %8.4f\n", loss / word_count);
-    sleep(10);
   }
 
   return NULL;

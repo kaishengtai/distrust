@@ -1,5 +1,6 @@
 #include "LanguageModel.h"
 
+#include <iostream>
 #include <math.h>
 #include <random>
 #include <sstream>
@@ -162,26 +163,26 @@ LanguageModel::get_update(ParamUpdate &ret, const double learn_rate) {
   double *ptr;
   for (auto itr = wordvec_w_grad_.begin(); itr != wordvec_w_grad_.end(); itr++) {
     uint32_t idx = itr->first;
-    ArrayXd a = itr->second.array() * learn_rate;
+    ArrayXd a = itr->second.array() * (-learn_rate);
     ptr = a.data();
     ret.wordvec_w[idx] = std::vector<double>(ptr, ptr + wordvec_dim_);
   }
 
   for (unsigned int i = 0; i < window_size_; i++) {
-    MArray_t a = input_hidden_w_grad_[i].array() * learn_rate;
+    MArray_t a = input_hidden_w_grad_[i].array() * (-learn_rate);
     ptr = a.data();
     ret.input_hidden_w.push_back(std::vector<double>(ptr, ptr + hidden_dim_ * wordvec_dim_));
   }
 
-  ArrayXd a_ihb = input_hidden_b_grad_.array() * learn_rate;
+  ArrayXd a_ihb = input_hidden_b_grad_.array() * (-learn_rate);
   ptr = a_ihb.data();
   ret.input_hidden_b = std::vector<double>(ptr, ptr + hidden_dim_);
 
-  MArray_t a_how = hidden_output_w_grad_.array() * learn_rate;
+  MArray_t a_how = hidden_output_w_grad_.array() * (-learn_rate);
   ptr = a_how.data();
   ret.hidden_output_w = std::vector<double>(ptr, ptr + vocab_size_ * hidden_dim_);
 
-  ArrayXd a_hob = hidden_output_b_grad_.array() * learn_rate;
+  ArrayXd a_hob = hidden_output_b_grad_.array() * (-learn_rate);
   ptr = a_hob.data();
   ret.hidden_output_b = std::vector<double>(ptr, ptr + vocab_size_);
 }

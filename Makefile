@@ -6,20 +6,17 @@ CXXFLAGS := -Wall \
 			-Wextra \
 			-Wno-unused-parameter \
 			-Wno-unused-variable \
-   			-O2 \
-   			-g \
+   			-O3 \
    			-pthread \
    			-std=c++11 \
    			$(INCDIRS)
 
-LDFLAGS := -L/usr/local/lib -L../logcabin/build
+LDFLAGS := -L/usr/local/lib
 
 LIBS := -lboost_system \
 		-lboost_filesystem \
 		-lboost_regex \
 		-lthrift \
-		-llogcabin \
-		-lprotobuf \
 		-lpthread
 
 THRIFT_SRC := \
@@ -42,4 +39,5 @@ all: worker/all paramserver/all
 
 clean: worker/clean paramserver/clean
 	rm -f gen-cpp/*.o
+	rm -f *.o
 	rm -rf bin

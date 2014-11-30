@@ -7,7 +7,6 @@
 
 #include "../LanguageModel.h"
 #include "distrust/gen-cpp/WorkerService.h"
-#include "logcabin/Client/Client.h"
 
 namespace distrust {
 
@@ -20,7 +19,6 @@ class ParamServer {
     const int32_t wordvec_dim,
     const int32_t hidden_dim,
     const int32_t port,
-    const std::string &raft_cluster,
     const std::string &train_dir,
     const std::string &test_dir);
   ~ParamServer() { }
@@ -41,10 +39,7 @@ class ParamServer {
  protected:
   // ParamServer port
   int32_t port_;
-
-  // Raft cluster
-  LogCabin::Client::Cluster cluster_;
-
+  
   // Main thread handle
   pthread_t server_thread_;
   
