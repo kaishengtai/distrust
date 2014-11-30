@@ -3,6 +3,7 @@
 
 #include "logcabin/Client/Client.h"
 
+#include <chrono>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -18,6 +19,7 @@ using namespace apache::thrift;
 using namespace apache::thrift::protocol;
 using namespace apache::thrift::transport;
 using namespace apache::thrift::server;
+using namespace std::chrono;
 namespace fs = boost::filesystem;
 
 using LogCabin::Client::Cluster;
@@ -62,35 +64,31 @@ ParamServer::ParamServer(
   const int32_t hidden_dim,
   const int32_t port,
   const std::string &raft_cluster,
-  const std::string &data_dir) :
+  const std::string &train_dir,
+  const std::string &test_dir) :
     port_(port),
     cluster_(raft_cluster) { 
 
-  if (!fs::exists(data_dir) || !fs::is_directory(data_dir)) {
-    throw std::invalid_argument("Invalid data directory: " + data_dir);
+  if (!fs::exists(train_dir) || !fs::is_directory(train_dir)) {
+    throw std::invalid_argument("Invalid data directory: " + train_dir);
   }
 
   // read vocabulary
   fs::path vocab_file("vocab.txt");
-  std::string vocab_path = (data_dir / vocab_file).native();
+  std::string vocab_path = (train_dir / vocab_file).native();
   if (!fs::exists(vocab_path)) {
-    throw std::invalid_argument("No vocab.txt in data directory: " + data_dir);
+    throw std::invalid_argument("No vocab.txt in data directory: " + train_dir);
   }
   read_vocab(vocab_path);
 
-  // get shard paths from data directory
+  // get shard paths from train data directory
   std::unique_lock<std::mutex> shard_paths_write_lock(shard_paths_lock_);
-  fs::directory_iterator end_iter;
-  for (fs::directory_iterator dir_iter(data_dir);
-       dir_iter != end_iter;
-       dir_iter++) {
-    if (fs::is_regular_file(dir_iter->status())) {
-      std::string path = dir_iter->path().native();
-      if (path == vocab_path) continue;
-      shard_paths_.push_back(path);
-    }
-  }
+  shard_paths_ = get_shard_paths(train_dir, vocab_path);
   shard_paths_write_lock.unlock();
+
+  // get shard paths from test data directory
+  // TODO: add lock if making testing multithreaded
+  test_shard_paths_ = get_shard_paths(test_dir, vocab_path);
 
   // initialize parameters
   std::unique_lock<std::mutex> model_write_lock(model_lock_);
@@ -107,6 +105,9 @@ ParamServer::ParamServer(
 
   // launch backup params thread
   pthread_create(&backup_thread_, NULL, &ParamServer::backup_params, this);
+
+  // launch model testing thread
+  pthread_create(&test_thread_, NULL, &ParamServer::test_model, this);
 }
 
 // Protected functions
@@ -116,6 +117,12 @@ struct HeartbeatConfig {
   std::string ip;
   int32_t port;
 };
+
+uint32_t
+ParamServer::time_millis() {
+  return duration_cast<milliseconds>(
+    high_resolution_clock::now().time_since_epoch()).count();
+}
 
 void
 ParamServer::reshard() {
@@ -193,6 +200,23 @@ ParamServer::add_worker(const std::string &ip, const int32_t port) {
 
   // Reshard and reassign
   reshard();
+}
+
+std::vector<std::string>
+ParamServer::get_shard_paths(const std::string &dir, const std::string &vocab_path) {
+  std::vector<std::string> paths;
+  fs::directory_iterator end_iter;
+  for (fs::directory_iterator dir_iter(dir);
+       dir_iter != end_iter;
+       dir_iter++) {
+    if (fs::is_regular_file(dir_iter->status())) {
+      std::string path = dir_iter->path().native();
+      if (path == vocab_path) continue;
+      paths.push_back(path);
+    }
+  }
+
+  return paths;
 }
 
 void
@@ -342,6 +366,48 @@ ParamServer::backup_params(void * arg) {
     
     sleep(20);
   }
+}
+
+void *
+ParamServer::test_model(void *arg) {
+  ParamServer *context = (ParamServer *)arg;
+  uint32_t window = context->model_info_.window_size;
+  while (true) {
+    context->model_lock_.lock();
+    LanguageModel model(*context->model_);
+    context->model_lock_.unlock();
+
+    std::cout << "Computing log-perplexity on validation set" << std::endl;
+    int word_count = 0;
+    double loss = 0.0;
+    uint32_t start = time_millis();
+    std::ifstream ifs;
+    for (const std::string &path : context->test_shard_paths_) {
+      std::cout << path << std::endl;
+      ifs.open(path);
+
+      std::string line;
+      while (std::getline(ifs, line)) {
+        std::vector<uint32_t> tokens = model.tokenize(line);
+        uint32_t len = tokens.size();
+        word_count += len - window;
+        for (unsigned int i = window; i < len; i++) {
+          uint32_t target = tokens[i];
+          std::vector<uint32_t> input(
+            tokens.begin() + i - window, tokens.begin() + i);
+          loss -= model.forward(input)[target];
+        }
+      }
+
+      ifs.close();
+    }
+
+    uint32_t elapsed = time_millis() - start;
+    printf("Validation set log-perplexity: %8.4f (%.2f words/s)\n",
+      loss / word_count, word_count / (elapsed / 1000.0));
+  }
+
+  return NULL;
 }
 
 }  // namespace distrust

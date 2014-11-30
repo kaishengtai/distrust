@@ -5,8 +5,6 @@
 #include <sstream>
 #include <getopt.h>
 
-#include <boost/regex.hpp>
-
 #include <transport/TSocket.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TThreadedServer.h>
@@ -104,10 +102,6 @@ Worker::announce(void *arg) {
   // Takes ownership of memory holding parameters.
   pthread_mutex_lock(&self->model_lock_);
   self->model_info_ = resp.model_info;
-  for (unsigned int i = 0; i < resp.model_info.vocab.size(); i++) {
-    self->vocab_[resp.model_info.vocab[i]] = i;
-  }
-
   self->model_ = std::unique_ptr<LanguageModel>(
     new LanguageModel(resp.model_info));
   self->model_->set_params(resp.params);
@@ -127,18 +121,6 @@ Worker::announce(void *arg) {
   pthread_cond_signal(&self->stop_cond_);
   pthread_mutex_unlock(&self->stop_lock_);
   return NULL;
-}
-
-uint32_t
-Worker::word_index(const std::string &word) {
-  boost::regex re("[0-9]");
-  std::string token = boost::regex_replace(word, re, "0");
-  uint32_t index = model_info_.unk_token_index;
-  auto itr = vocab_.find(token);
-  if (itr != vocab_.end()) {
-    index = itr->second;
-  }
-  return index;
 }
 
 void *
@@ -176,14 +158,8 @@ Worker::compute(void *arg) {
     }
     pthread_mutex_unlock(&self->stop_lock_);
 
-    // Read next line
-    int window = self->model_info_.window_size;
-    std::string line, word;
-    std::vector<uint32_t> tokens;
-    for (int i = 0; i < window - 1; i++) {
-      tokens.push_back(self->model_info_.start_token_index);
-    }
-
+    // Read next line from shard
+    std::string line;
     while (!std::getline(cur_shard, line)) {
       pthread_mutex_lock(&self->completed_shards_lock_);
       self->completed_shards_.insert(cur_shard_path);
@@ -200,16 +176,10 @@ Worker::compute(void *arg) {
       cur_shard.close();
       cur_shard.open(cur_shard_path);
     }
-
-    std::stringstream ss(line);
     
-    while (std::getline(ss, word, ' ')) {
-      tokens.push_back(self->word_index(word));
-    }
-    tokens.push_back(self->model_info_.end_token_index);
-
     // Compute gradient update
-    std::cout << "Computing on sentence" << std::endl;
+    uint32_t window = self->model_info_.window_size;
+    std::vector<uint32_t> tokens = self->model_->tokenize(line);
     for (unsigned int i = window; i < tokens.size(); i++) {
       uint32_t target = tokens[i];
       std::vector<uint32_t> input(
@@ -220,7 +190,7 @@ Worker::compute(void *arg) {
 
       if (count == self->batch_size_) {
         count = 0;
-        
+
         // get update and push
         std::cout << "Pushing update" << std::endl;
         ParamUpdate update;

@@ -2,6 +2,9 @@
 
 #include <math.h>
 #include <random>
+#include <sstream>
+
+#include <boost/regex.hpp>
 
 using namespace distrust;
 using namespace Eigen;
@@ -17,6 +20,9 @@ LanguageModel::LanguageModel(const ModelInfo &model_info) :
   end_token_index_ = model_info.end_token_index;
   unk_token_index_ = model_info.unk_token_index;
   vocab_size_ = model_info.vocab.size();
+  for (unsigned int i = 0; i < vocab_size_; i++) {
+    vocab_[model_info.vocab[i]] = i;
+  }
 
   wordvec_w_.reserve(vocab_size_);
   wordvec_w_buf_.reserve(vocab_size_);
@@ -30,6 +36,29 @@ LanguageModel::LanguageModel(const ModelInfo &model_info) :
   hidden_output_w_grad_ = Matrix_t(vocab_size_, hidden_dim_);
   hidden_output_b_grad_ = Vector_t(vocab_size_);
   zero_grad_params();
+}
+
+LanguageModel::LanguageModel(const LanguageModel &model) :
+  window_size_(model.window_size_),
+  wordvec_dim_(model.wordvec_dim_),
+  hidden_dim_(model.hidden_dim_),
+  start_token_index_(model.start_token_index_),
+  end_token_index_(model.end_token_index_),
+  unk_token_index_(model.unk_token_index_),
+  vocab_size_(model.vocab_size_),
+  vocab_(model.vocab_),
+  wordvec_w_buf_(model.wordvec_w_buf_),
+  input_hidden_w_buf_(model.input_hidden_w_buf_),
+  input_hidden_b_buf_(model.input_hidden_b_buf_),
+  hidden_output_w_buf_(model.hidden_output_w_buf_),
+  hidden_output_b_buf_(model.hidden_output_b_buf_),
+  input_hidden_w_grad_(model.input_hidden_w_grad_),
+  input_hidden_b_grad_(model.input_hidden_b_grad_),
+  hidden_output_w_grad_(model.hidden_output_w_grad_),
+  hidden_output_b_grad_(model.hidden_output_b_grad_) {
+  
+  zero_grad_params();
+  wrap_buffers();
 }
 
 double
@@ -133,26 +162,26 @@ LanguageModel::get_update(ParamUpdate &ret, const double learn_rate) {
   double *ptr;
   for (auto itr = wordvec_w_grad_.begin(); itr != wordvec_w_grad_.end(); itr++) {
     uint32_t idx = itr->first;
-    ArrayXd a = itr->second.array() * learn_rate;
+    ArrayXd a = itr->second.array() * (-learn_rate);
     ptr = a.data();
     ret.wordvec_w[idx] = std::vector<double>(ptr, ptr + wordvec_dim_);
   }
 
   for (unsigned int i = 0; i < window_size_; i++) {
-    MArray_t a = input_hidden_w_grad_[i].array() * learn_rate;
+    MArray_t a = input_hidden_w_grad_[i].array() * (-learn_rate);
     ptr = a.data();
     ret.input_hidden_w.push_back(std::vector<double>(ptr, ptr + hidden_dim_ * wordvec_dim_));
   }
 
-  ArrayXd a_ihb = input_hidden_b_grad_.array() * learn_rate;
+  ArrayXd a_ihb = input_hidden_b_grad_.array() * (-learn_rate);
   ptr = a_ihb.data();
   ret.input_hidden_b = std::vector<double>(ptr, ptr + hidden_dim_);
 
-  MArray_t a_how = hidden_output_w_grad_.array() * learn_rate;
+  MArray_t a_how = hidden_output_w_grad_.array() * (-learn_rate);
   ptr = a_how.data();
   ret.hidden_output_w = std::vector<double>(ptr, ptr + vocab_size_ * hidden_dim_);
 
-  ArrayXd a_hob = hidden_output_b_grad_.array() * learn_rate;
+  ArrayXd a_hob = hidden_output_b_grad_.array() * (-learn_rate);
   ptr = a_hob.data();
   ret.hidden_output_b = std::vector<double>(ptr, ptr + vocab_size_);
 }
@@ -166,6 +195,34 @@ LanguageModel::tanh(const VectorXd &v) {
 double
 LanguageModel::logZ(const VectorXd &v) {
   return log(v.array().exp().sum());
+}
+
+uint32_t
+LanguageModel::word_index(const std::string &word) {
+  boost::regex re("[0-9]");
+  std::string token = boost::regex_replace(word, re, "0");
+  uint32_t index = unk_token_index_;
+  auto itr = vocab_.find(token);
+  if (itr != vocab_.end()) {
+    index = itr->second;
+  }
+  return index;
+}
+
+std::vector<uint32_t>
+LanguageModel::tokenize(const std::string &line) {
+  std::vector<uint32_t> tokens;
+  for (unsigned int i = 0; i < window_size_; i++) {
+    tokens.push_back(start_token_index_);
+  }
+
+  std::string word;
+  std::stringstream ss(line);
+  while (std::getline(ss, word, ' ')) {
+    tokens.push_back(word_index(word));
+  }
+  tokens.push_back(end_token_index_);
+  return tokens;
 }
 
 std::vector<double>
