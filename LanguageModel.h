@@ -20,6 +20,7 @@ typedef Matrix<double, Dynamic, 1> Vector_t;
 class LanguageModel {
  public:
   LanguageModel(const distrust::ModelInfo &model_info);
+  LanguageModel(const LanguageModel &model);
   ~LanguageModel() {};
 
   void random_init();
@@ -27,15 +28,15 @@ class LanguageModel {
   void update_params(const distrust::ParamUpdate &update);
   void get_params(distrust::Params &ret);
   void get_update(distrust::ParamUpdate &ret, const double learn_rate);
+  std::vector<uint32_t> tokenize(const std::string &line);
   std::vector<double> forward(const std::vector<uint32_t> &input);
-  //Eigen::MatrixXd forward(Eigen::MatrixXd input);
   void backward(const std::vector<uint32_t> &input, const uint32_t target);
-  //distrust::Params backward(Eigen::MatrixXd input);
   void zero_grad_params();
 
  protected:
   inline double sample();
   void wrap_buffers();
+  uint32_t word_index(const std::string &word);
   Eigen::VectorXd tanh(const Eigen::VectorXd &v);
   double logZ(const Eigen::VectorXd &v);
 
@@ -47,7 +48,9 @@ class LanguageModel {
   uint32_t start_token_index_;
   uint32_t end_token_index_;
   uint32_t unk_token_index_;
-  uint32_t vocab_size_; 
+  uint32_t vocab_size_;
+
+  std::unordered_map<std::string, uint32_t> vocab_;
 
   // Source of randomness
   std::uniform_real_distribution<double> unif_;

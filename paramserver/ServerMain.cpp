@@ -23,7 +23,8 @@ class OptionParser {
     static struct option longOptions[] = {
       {"cluster",  required_argument, NULL, 'c'},
       {"port", required_argument, 0, 'p'},
-      {"data", required_argument, 0, 'd'},
+      {"train", required_argument, 0, 'T'},
+      {"test", required_argument, 0, 't'},
       {"window", required_argument, 0, 'w'},
       {"wordvec", required_argument, 0, 'v'},
       {"hidden", required_argument, 0, 'H'},
@@ -32,7 +33,7 @@ class OptionParser {
     };
 
     int c;
-    while ((c = getopt_long(argc, argv, "c:p:d:w:v:H:h",
+    while ((c = getopt_long(argc, argv, "c:p:T:t:w:v:H:h",
                             longOptions, NULL)) != -1) {
       switch (c) {
         case 'c':
@@ -41,8 +42,11 @@ class OptionParser {
         case 'p':
           port = atoi(optarg);
           break;
-        case 'd':
-          data_dir = optarg;
+        case 'T':
+          train_dir = optarg;
+          break;
+        case 't':
+          test_dir = optarg;
           break;
         case 'w':
           window_size = atoi(optarg);
@@ -73,9 +77,10 @@ class OptionParser {
                 << "(default: logcabin:61023)" << std::endl;
       std::cout << "  -p, --port <port> "
                 << "The port that the ParamServer listens to RPC" << std::endl;
-      std::cout << "  -d, --data <dir> "
-                << "The path to the directory that contains the dataset "
+      std::cout << "  -T, --train <dir> "
+                << "The path to the directory that contains the train dataset "
                 << "(assumed to contain vocabulary in vocab.txt)" << std::endl;
+      std::cout << "  -t, --test <dir>" << std::endl;
       std::cout << "  -w, --window <dim>" << std::endl;
       std::cout << "  -v, --wordvec <dim>" << std::endl;
       std::cout << "  -H, --hidden <dim>" << std::endl;
@@ -91,7 +96,7 @@ class OptionParser {
   int hidden_dim;
   int port;
   std::string cluster;
-  std::string data_dir;
+  std::string train_dir, test_dir;
 };
 
 int main(int argc, char **argv) {
@@ -114,7 +119,8 @@ int main(int argc, char **argv) {
     options.hidden_dim,
     options.port,
     options.cluster,
-    options.data_dir);
+    options.train_dir,
+    options.test_dir);
   param_server.run();
   return 0;
 }
