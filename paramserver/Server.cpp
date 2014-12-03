@@ -152,6 +152,59 @@ ParamServer::reshard() {
   // Unlocked in destructors.
 }
 
+// Call this when we already have existing workers.
+void
+ParamServer::reshard(const std::string &new_worker) {
+  std::unique_lock<std::mutex> worker_clients_read_lock(
+      worker_clients_lock_, std::defer_lock);
+  std::unique_lock<std::mutex> shard_paths_write_lock(
+      shard_paths_lock_, std::defer_lock);
+  // This prevents deadlock.
+  std::lock(worker_clients_read_lock, shard_paths_write_lock);
+  int num_workers = worker_clients_.size();
+  if (num_workers <= 0) {
+    return;
+  }
+  uint32_t shards_per_worker = std::max(
+      static_cast<uint32_t>(shard_paths_.size() / num_workers), 1u);
+  // steal from existing workers (from the ends of each vector)
+  std::vector<std::string> new_worker_shards;
+  while (new_worker_shards.size() < shards_per_worker) {
+    bool changed = false;
+    for (auto &kv : worker_to_shards_) {
+      if (kv.first == new_worker) {
+        continue;
+      }
+      
+      if (kv.second.size() <= 1) {
+        // Don't steal from workers with only one shard.
+        continue;
+      }
+      
+      new_worker_shards.push_back(kv.second.back());
+      kv.second.pop_back();
+      changed = true;
+
+      // If we have enough -- stop.
+      if (new_worker_shards.size() >= shards_per_worker) {
+        break;
+      }
+    }
+    
+    if (!changed) {
+      // Stealing algorithm reached non-changing state. Exit.
+      break;
+    }
+  }
+  
+  worker_to_shards_[new_worker] = new_worker_shards;
+  
+  for (const auto &kv : worker_clients_) {
+    kv.second->reassign(worker_to_shards_[kv.first]);
+  }
+  // Unlocked in destructors.
+}
+
 void
 ParamServer::add_worker(const std::string &ip, const int32_t port) {
   shared_ptr<TSocket> socket(new TSocket(ip, port));
@@ -188,7 +241,11 @@ ParamServer::add_worker(const std::string &ip, const int32_t port) {
   heartbeat_threads_write_lock.unlock();
 
   // Reshard and reassign
-  reshard();
+  if (worker_clients_.size() <= 1) {
+    reshard();
+  } else {
+    reshard(worker_key);
+  }
 }
 
 std::vector<std::string>
@@ -369,6 +426,7 @@ ParamServer::test_model(void *arg) {
     std::cout << "Computing log-perplexity on validation set" << std::endl;
     int word_count = 0;
     double loss = 0.0;
+    uint32_t start = time_millis();
     std::ifstream ifs;
     for (const std::string &path : context->test_shard_paths_) {
       std::cout << path << std::endl;
@@ -390,7 +448,9 @@ ParamServer::test_model(void *arg) {
       ifs.close();
     }
 
-    printf("Validation set log-perplexity: %8.4f\n", loss / word_count);
+    uint32_t elapsed = time_millis() - start;
+    printf("Validation set log-perplexity: %8.4f (%.2f words/s)\n",
+      loss / word_count, word_count / (elapsed / 1000.0));
   }
 
   return NULL;

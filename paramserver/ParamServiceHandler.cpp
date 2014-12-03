@@ -45,7 +45,6 @@ ParamServiceHandler::announce(
 void
 ParamServiceHandler::push_update(const ParamUpdate &update) {
   //std::cout << "push_update" << std::endl;
-  
   std::unique_lock<std::mutex> model_write_lock(
       server_->model_lock_);
   server_->model_->update_params(update);
@@ -55,7 +54,6 @@ ParamServiceHandler::push_update(const ParamUpdate &update) {
 void
 ParamServiceHandler::pull_params(Params &_return) {
   //std::cout << "pull_params" << std::endl;
-  
   std::unique_lock<std::mutex> model_read_lock(
       server_->model_lock_);
   server_->model_->get_params(_return);
