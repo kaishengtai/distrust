@@ -29,6 +29,7 @@ class ParamServer {
 
  protected:
   void reshard();
+  void reshard(const std::string &new_worker);
   void add_worker(const std::string &ip, const int32_t port);
   void read_vocab(const std::string &path);
   std::vector<std::string> get_shard_paths(
