@@ -107,7 +107,7 @@ struct HeartbeatConfig {
   int32_t port;
 };
 
-uint32_t
+long
 ParamServer::time_millis() {
   return duration_cast<milliseconds>(
     high_resolution_clock::now().time_since_epoch()).count();
@@ -418,13 +418,15 @@ void *
 ParamServer::test_model(void *arg) {
   ParamServer *context = (ParamServer *)arg;
   uint32_t window = context->model_info_.window_size;
+  long start = time_millis();
+  std::ofstream ofs("validation.out");
   while (true) {
     context->model_lock_.lock();
     LanguageModel model(*context->model_);
     context->model_lock_.unlock();
 
     std::cout << "Computing log-perplexity on validation set" << std::endl;
-    uint32_t start = time_millis();
+    //long start = time_millis();
     int word_count = 0;
     double loss = 0.0;
     std::ifstream ifs;
@@ -444,7 +446,7 @@ ParamServer::test_model(void *arg) {
           loss -= model.forward(input)[target];
         }
 
-        uint32_t elapsed = time_millis() - start;
+        //long elapsed = time_millis() - start;
         //std::cout << word_count / (elapsed / 1000.0) << std::endl;
       }
 
@@ -452,6 +454,8 @@ ParamServer::test_model(void *arg) {
     }
 
     uint32_t elapsed = time_millis() - start;
+    ofs <<  (elapsed / 1000.0) << "\t" << loss / word_count << std::endl;
+    ofs.flush();
     printf("Validation set log-perplexity: %8.4f (%.2f words/s)\n",
       loss / word_count, word_count / (elapsed / 1000.0));
   }

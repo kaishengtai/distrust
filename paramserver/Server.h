@@ -32,7 +32,7 @@ class ParamServer {
   void read_vocab(const std::string &path);
   std::vector<std::string> get_shard_paths(
     const std::string &dir, const std::string &vocab_path);
-  static uint32_t time_millis();
+  static long time_millis();
   static void *server(void *);
   static void *heartbeat(void *);
   static void *backup_params(void *);
