@@ -6,7 +6,8 @@ CXXFLAGS := -Wall \
 			-Wextra \
 			-Wno-unused-parameter \
 			-Wno-unused-variable \
-   			-O3 \
+			-g \
+   			-O2 \
    			-pthread \
    			-std=c++11 \
    			$(INCDIRS)

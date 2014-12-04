@@ -36,6 +36,19 @@ LanguageModel::LanguageModel(const ModelInfo &model_info) :
   input_hidden_b_grad_ = Vector_t(hidden_dim_);
   hidden_output_w_grad_ = Matrix_t(vocab_size_, hidden_dim_);
   hidden_output_b_grad_ = Vector_t(vocab_size_);
+
+  // adagrad
+  for (unsigned int i = 0; i < vocab_size_; i++) {
+    wordvec_w_var_.push_back(ArrayXd::Zero(wordvec_dim_));
+  }
+
+  for (unsigned int i = 0; i < window_size_; i++) {
+    input_hidden_w_var_.push_back(MArray_t::Zero(hidden_dim_, wordvec_dim_));
+  }
+
+  input_hidden_b_var_ = ArrayXd::Zero(hidden_dim_);
+  hidden_output_w_var_ = MArray_t::Zero(vocab_size_, hidden_dim_);
+  hidden_output_b_var_ = ArrayXd::Zero(vocab_size_);
   zero_grad_params();
 }
 
@@ -163,26 +176,41 @@ LanguageModel::get_update(ParamUpdate &ret, const double learn_rate) {
   double *ptr;
   for (auto itr = wordvec_w_grad_.begin(); itr != wordvec_w_grad_.end(); itr++) {
     uint32_t idx = itr->first;
-    ArrayXd a = itr->second.array() * (-learn_rate);
+    //ArrayXd a = itr->second.array() * (-learn_rate);
+    ArrayXd a = itr->second.array();
+    wordvec_w_var_[idx] += a.square();
+    a *= -learn_rate / (wordvec_w_var_[idx].sqrt() + 1e-4);
     ptr = a.data();
     ret.wordvec_w[idx] = std::vector<double>(ptr, ptr + wordvec_dim_);
   }
 
   for (unsigned int i = 0; i < window_size_; i++) {
-    MArray_t a = input_hidden_w_grad_[i].array() * (-learn_rate);
+    //MArray_t a = input_hidden_w_grad_[i].array() * (-learn_rate);
+    MArray_t a = input_hidden_w_grad_[i].array();
+    input_hidden_w_var_[i] += a.square();
+    a *= -learn_rate / (input_hidden_w_var_[i].sqrt() + 1e-4);
     ptr = a.data();
     ret.input_hidden_w.push_back(std::vector<double>(ptr, ptr + hidden_dim_ * wordvec_dim_));
   }
 
-  ArrayXd a_ihb = input_hidden_b_grad_.array() * (-learn_rate);
+  //ArrayXd a_ihb = input_hidden_b_grad_.array() * (-learn_rate);
+  ArrayXd a_ihb = input_hidden_b_grad_.array();
+  input_hidden_b_var_ += a_ihb.square();
+  a_ihb *= -learn_rate / (input_hidden_b_var_.sqrt() + 1e-4);
   ptr = a_ihb.data();
   ret.input_hidden_b = std::vector<double>(ptr, ptr + hidden_dim_);
 
-  MArray_t a_how = hidden_output_w_grad_.array() * (-learn_rate);
+  //MArray_t a_how = hidden_output_w_grad_.array() * (-learn_rate);
+  MArray_t a_how = hidden_output_w_grad_.array();
+  hidden_output_w_var_ += a_how.square();
+  a_how *= -learn_rate / (hidden_output_w_var_.sqrt() + 1e-4);
   ptr = a_how.data();
   ret.hidden_output_w = std::vector<double>(ptr, ptr + vocab_size_ * hidden_dim_);
 
-  ArrayXd a_hob = hidden_output_b_grad_.array() * (-learn_rate);
+  //ArrayXd a_hob = hidden_output_b_grad_.array() * (-learn_rate);
+  ArrayXd a_hob = hidden_output_b_grad_.array();
+  hidden_output_b_var_ += a_hob.square();
+  a_hob *= -learn_rate / (hidden_output_b_var_.sqrt() + 1e-4);
   ptr = a_hob.data();
   ret.hidden_output_b = std::vector<double>(ptr, ptr + vocab_size_);
 }
@@ -240,10 +268,54 @@ LanguageModel::forward(const std::vector<uint32_t> &input) {
   output_ = (*hidden_output_w_) * hidden_tanh_ + (*hidden_output_b_);
   logZ_ = logZ(output_);
   output_normed_ = (output_.array() - logZ_).matrix();
-
   double *ptr = output_normed_.data();
   return std::vector<double>(ptr, ptr + vocab_size_);
 }
+
+// double
+// LanguageModel::forward(const std::vector<uint32_t> &tokens) {
+//   uint32_t size = tokens.size() - window_size_;
+//   Matrix<uint32_t, Dynamic, Dynamic> input(size, window_size_);
+//   for (unsigned int i = 0; i < size; i++) {
+//     for (unsigned int j = 0; j < window_size_; j++) {
+//       input(i, j) = tokens[i + j];
+//     }
+//   }
+
+
+// }
+
+// double
+// LanguageModel::forward(const std::vector<uint32_t> &input, const uint32_t target) {
+//   if (input.size() != window_size_) {
+//     throw std::invalid_argument("forward: input size does not equal window size");
+//   }
+
+//   hidden_ = *input_hidden_b_;
+//   for (unsigned int i = 0; i < window_size_; i++) {
+//     hidden_ += input_hidden_w_[i] * wordvec_w_[input[i]];
+//   }
+//   hidden_tanh_ = tanh(hidden_);
+//   output_ = (*hidden_output_w_) * hidden_tanh_ + (*hidden_output_b_);
+//   logZ_ = logZ(output_);
+//   output_normed_ = (output_.array() - logZ_).matrix();
+//   return output_normed_(target);
+// }
+
+// std::vector<double>
+// LanguageModel::forward(const std::vector<uint32_t> &input, uint32_t target_idx) {
+//   hidden_ = *input_hidden_b_;
+//   for (unsigned int i = 0; i < window_size_; i++) {
+//     hidden_ += input_hidden_w_[i] * wordvec_w_[input[target_idx - window_size_ + i]];
+//   }
+//   hidden_tanh_ = tanh(hidden_);
+//   output_ = (*hidden_output_w_) * hidden_tanh_ + (*hidden_output_b_);
+//   logZ_ = logZ(output_);
+//   output_normed_ = (output_.array() - logZ_).matrix();
+
+//   double *ptr = output_normed_.data();
+//   return std::vector<double>(ptr, ptr + vocab_size_);
+// }
 
 void
 LanguageModel::backward(

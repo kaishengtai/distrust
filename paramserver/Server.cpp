@@ -424,9 +424,9 @@ ParamServer::test_model(void *arg) {
     context->model_lock_.unlock();
 
     std::cout << "Computing log-perplexity on validation set" << std::endl;
+    uint32_t start = time_millis();
     int word_count = 0;
     double loss = 0.0;
-    uint32_t start = time_millis();
     std::ifstream ifs;
     for (const std::string &path : context->test_shard_paths_) {
       std::cout << path << std::endl;
@@ -443,6 +443,9 @@ ParamServer::test_model(void *arg) {
             tokens.begin() + i - window, tokens.begin() + i);
           loss -= model.forward(input)[target];
         }
+
+        uint32_t elapsed = time_millis() - start;
+        //std::cout << word_count / (elapsed / 1000.0) << std::endl;
       }
 
       ifs.close();

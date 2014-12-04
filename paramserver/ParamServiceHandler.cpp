@@ -34,7 +34,7 @@ ParamServiceHandler::announce(
   _return.shard_paths = server_->worker_to_shards_[
       get_worker_key(worker_ip_, worker_port)];
   shard_paths_write_lock.unlock();
-  _return.learn_rate = 0.025;
+  _return.learn_rate = 0.1;
   _return.batch_size = 128;
   std::unique_lock<std::mutex> model_read_lock(
       server_->model_lock_);
