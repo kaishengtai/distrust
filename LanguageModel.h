@@ -13,6 +13,7 @@ using Eigen::RowMajor;
 using Eigen::Matrix;
 using Eigen::Map;
 using Eigen::VectorXd;
+using Eigen::ArrayXd;
 
 typedef Matrix<double, Dynamic, Dynamic, RowMajor> Matrix_t;
 typedef Array<double, Dynamic, Dynamic, RowMajor> MArray_t;
@@ -31,6 +32,7 @@ class LanguageModel {
   void get_update(distrust::ParamUpdate &ret, const double learn_rate);
   std::vector<uint32_t> tokenize(const std::string &line);
   std::vector<double> forward(const std::vector<uint32_t> &input);
+  //std::vector<double> forward(const std::vector<uint32_t> &input, const uint32_t target_idx);
   void backward(const std::vector<uint32_t> &input, const uint32_t target);
   void zero_grad_params();
 
@@ -42,6 +44,13 @@ class LanguageModel {
   double logZ(const Eigen::VectorXd &v);
 
  protected:
+  bool adagrad_ = true;
+  std::vector<ArrayXd> wordvec_w_var_;
+  std::vector<MArray_t> input_hidden_w_var_;
+  ArrayXd input_hidden_b_var_;
+  MArray_t hidden_output_w_var_;
+  ArrayXd hidden_output_b_var_;
+
   // Model information
   uint32_t window_size_;
   uint32_t wordvec_dim_;
